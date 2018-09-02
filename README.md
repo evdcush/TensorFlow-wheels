@@ -2,6 +2,10 @@
 
 These are custom TensorFlow wheels built from source, optimized for my machines. All wheels were built for x64 linux (confirmed working on \*buntu 16.04) with intel processors.
 
+The GPU versions are built for a machine with a Core i7-7700 and GTX 1070.
+
+The CPU versions are mostly built for my ancient thinkpads (T430: -march=ivybridge, X201: -march=westmere).
+
 ## Wheels Available
 
 You can find the wheels in the [releases page](https://github.com/evdcush/TensorFlow-wheels/releases).
