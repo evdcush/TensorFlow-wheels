@@ -86,7 +86,7 @@ The most common method you will see when googling around is explicitly passing t
 > `Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]: -msse4.1 -msse4.2 -mavx -mavx2 -mfma`
 
 ##### The just letting the build default do it for you automatically way
-There's no reason you need to specify any of those instructions to the build configuration. It will do it for you by default. Note that the configuration default for optimzation flags is said to be `-march=native`. 
+There's no reason you need to specify any of those instructions to the build configuration. It will do it for you by default. Note that the configuration default for optimization flags is said to be `-march=native`. 
 
 `-march=native` means your native x86_64 microarchitecture--in other words, the instruction set supported by your CPU. So if you just don't specify anything to the tensorflow build config, it will automatically build tensorflow to be optimized for your machine via `-march=native`. In fact, the only way Tensorflow knows it was not compiled to use those instruction sets is because it checks the capabilities of your architecture by looking at what instructions are supported by GCC by `march=native` So if you got warnings for `SSE4.1, SSE4.2, AVX, AVX2, FMA`, it's because your `march=native` says you can do them.
 
@@ -136,7 +136,7 @@ sudo apt full-upgrade
 #==== Install gcc version
 sudo apt install gcc-7 g++-7 gcc-8 g++-8
 
-# slaving g++ to gcc version insures that the g++ verion always matches current gcc, so 
+# slaving g++ to gcc version insures that the g++ version always matches current gcc, so 
 #  you don't have to switch both
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
@@ -196,6 +196,8 @@ sudo apt install cuda-9-2
 # Now, add the following lines to your shell config (.zshrc, etc)
 export PATH=/usr/local/cuda-9.2/bin${PATH:+:${PATH}}
 export LD_LIBRARY_PATH=/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+
+# Reboot machine to finish installation
 reboot
 
 # Verify successful installation
@@ -238,7 +240,7 @@ All done with the GPU environment!
 
 
 ## Installing MKL
-The following MKL installation guide was copied, verbatim, from TinyMind (https://github.com/mind) at https://github.com/mind/wheels#mkl. That's where I got my wheels before I started building my own. Make sure to check them out!
+**The following MKL installation guide was copied, verbatim, from TinyMind (https://github.com/mind) at https://github.com/mind/wheels#mkl. That's where I got my wheels before I started building my own. Make sure to check them out!*
 
 MKL is [Intel's deep learning kernel library](https://github.com/01org/mkl-dnn), which makes training neural nets on CPU much faster. If you don't have it, install it like the following:
 
@@ -254,5 +256,5 @@ sudo make install
 echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib' >> ~/.bashrc
 ```
 
-##### License:
+## License:
 Except where noted, the written content of this repo, is licensed as [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 License](https://creativecommons.org/licenses/by-nc-sa/4.0/), while any software/code is licensed as BSD-3.
