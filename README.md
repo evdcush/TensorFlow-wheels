@@ -140,12 +140,13 @@ Don't push shit here, just smash that enter key. Anything you would pass here is
 
 ##### Once you've finished ./configuration, just call bazel build
 `bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
-If you built for CUDA or whatever, it's already been setup. There's no need to specify it as a config option again, nor is there any need to list out all the ISA extensions (SSE4.2, AVX, etc.). That's all handled by -march=native (that line you were SUPPOSED to default). If you want mkl, you can ``bazel build --config=opt --config=mkl`
+
+If you built for CUDA or whatever, it's already been setup. There's no need to specify it as a config option again, nor is there any need to list out all the ISA extensions (SSE4.2, AVX, etc.). That's all handled by -march=native (that line you were SUPPOSED to default). If you want mkl, you can `bazel build --config=opt --config=mkl`
 
 #### Finally: build the pip wheel
-`bazel-bin/tensorflow/tools/pip_package/build_pip_package ~/`
 I like just putting the pip whl in home, but put it wherever you want.
 
+`bazel-bin/tensorflow/tools/pip_package/build_pip_package ~/`
 
 * * *
 
@@ -159,7 +160,7 @@ While the build guides below (wrt the actual TF configuration and build) are fai
 
 - **\*Buntu 16.04**: Xenial Ubuntu has native support from all the libraries and software you need for your deep-learning env. From my own experience, it's also probably the most stable, solid distro I've ever used, even amongst other buntu LTS releases.
   - [Xubuntu](https://xubuntu.org/): my recommendation for Ubuntu. It's an official flavor of Ubuntu that has a very clean, lightweight desktop environment (XFCE), without most of the bloat from vanilla Ubuntu. With the exception of certain desktop-related items (like panel plugins or windows managers), everything that applies to Ubuntu applies to Xubuntu.
-  - **Why not 18.04?** Pain. Suffering. Agony. I've tried 18.04 a few times now, as well as the point release 18.04.1, and it's just a headache. For many libraries or software I use, 18.04 was no different then Xenial. But for certain items, it was impossibly broken and unsupported, and even fundamental system settings, like grub, display, and kernel were broken out of the box [1](https://askubuntu.com/questions/1030867/how-to-diagnose-fix-very-slow-boot-on-ubuntu-18-04)[2](https://askubuntu.com/questions/1053531/18-04-slow-boot-and-black-screen-on-boot-before-reaching-login-splash)[3](https://askubuntu.com/questions/1051762/long-boot-delay-on-ubuntu-loading-splash-screen-following-regular-dist-upgrade-o)[4](https://bugs.launchpad.net/ubuntu/+source/plymouth/+bug/1769309)[5](https://bugs.launchpad.net/ubuntu/+source/gdm3/+bug/1779476). On my most recent attempt at 18.04.1, after realizing how [FUBAR](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053) [Nvidia driver support alone](https://askubuntu.com/questions/1032938/trying-to-install-nvidia-driver-for-ubuntu-desktop-18-04-lts) [is](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053) is, not even being able to reach CUDA/cuDNN setup, I decided I'd just wait until I see an official CUDA package for 18.04 from Nvidia. However, **if you are not installing CUDA libraries** and you're not afraid to pass through dependency hell, 18.04 will likely suit your needs. But, keep in mind:
+  - **Why not 18.04?** Pain. Suffering. Agony. I've tried 18.04 a few times now, as well as the point release 18.04.1, and it's just a headache. For many libraries or software I use, 18.04 was no different then Xenial. But for certain items, it was impossibly broken and unsupported, and even fundamental system settings, like grub, display, and kernel were broken out of the box [1](https://askubuntu.com/questions/1030867/how-to-diagnose-fix-very-slow-boot-on-ubuntu-18-04)[2](https://askubuntu.com/questions/1053531/18-04-slow-boot-and-black-screen-on-boot-before-reaching-login-splash)[3](https://askubuntu.com/questions/1051762/long-boot-delay-on-ubuntu-loading-splash-screen-following-regular-dist-upgrade-o)[4](https://bugs.launchpad.net/ubuntu/+source/plymouth/+bug/1769309)[5](https://bugs.launchpad.net/ubuntu/+source/gdm3/+bug/1779476). On my most recent attempt at 18.04.1, after realizing how [FUBAR](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053) [Nvidia driver support alone](https://askubuntu.com/questions/1032938/trying-to-install-nvidia-driver-for-ubuntu-desktop-18-04-lts) [is](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053), not even being able to reach CUDA/cuDNN setup, I decided I'd just wait until I see an official CUDA package for 18.04 from Nvidia. However, **if you are not installing CUDA libraries** and you're not afraid to pass through dependency hell, 18.04 will likely suit your needs. But, keep in mind:
     - Bazel does not support 18.04 (Bazel is required for building TensorFlow)
     - CUDA and it's libraries does not support 18.04 (CUDA is optional)
     - Intel MKL does not support 18.04 (MKL is optional)
@@ -191,14 +192,15 @@ Since most people (myself included) decided to build from source, or find optimi
 #### So how can you build tensorflow to support these extensions?
 **TL;DR** just use the default `-march=native` for `--config=opt`. Ie, don't do anything.
 
-##### Most popular: the I want extra work for myself way
+#### Most popular: the I want extra work for myself way
 The most common method you will see when googling around is explicitly passing the instructions you want to `--config=opt`. eg:
 - Dispensing with `./configure` altogether and just specifying everything to bazel build:
-`bazel build -c opt -copt=-msse4.1 --copt=-msse4.2 --copt=-mavx --copt=-mavx2 --copt=-mfma //tensorflow/tools/pip_package:build_pip_package`
+>`bazel build -c opt -copt=-msse4.1 --copt=-msse4.2 --copt=-mavx --copt=-mavx2 --copt=-mfma //tensorflow/tools/pip_package:build_pip_package`
+
 - Or, specifying the config optimization flags in `./configure`:
 > `Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]: -msse4.1 -msse4.2 -mavx -mavx2 -mfma`
 
-##### The just letting the build default do it for you automatically way
+#### The just letting the build default do it for you automatically way
 There's no reason you need to specify any of those instructions to the build configuration. It will do it for you by default. Note that the configuration default for optimization flags is said to be `-march=native`. 
 
 `-march=native` means your native x86_64 microarchitecture--in other words, the instruction set supported by your CPU. So if you just don't specify anything to the tensorflow build config, it will automatically build tensorflow to be optimized for your machine via `-march=native`. In fact, the only way Tensorflow knows it was not compiled to use those instruction sets is because it checks the capabilities of your architecture by looking at what instructions are supported by GCC by `march=native` So if you got warnings for `SSE4.1, SSE4.2, AVX, AVX2, FMA`, it's because your `march=native` says you can do them.
@@ -216,8 +218,11 @@ Yes. In my experience, there are two situations in which you will specify additi
 - **MKL**: If you have `mkl` installed on your system, you will want to specify that the bazel build like, eg: `bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package` I believe the bazel std:out even mentions this.
 - **a non-native -march**: If you are building tensorflow for a different machine, perhaps one that does not have the same processor architecture as the build machine, then you will want to specify that `march`. 
   - For instance, I also build tensorflow for two other machines, my thinkpads, which have older processors. So, my typical build configs for my thinkpads look like this:
-    - **ThinkPad T430, with a Core i5-3320M (Ivybridge) processor**: `bazel build --config=opt --copt=-march="ivybridge" --config=mkl //tensorflow/tools/pip_package:build_pip_package`
-    - **ThinkPad X201, with a Core i5-540M (Westmere) processor**: `bazel build --config=opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package`
+    - **ThinkPad T430, with a Core i5-3320M (Ivybridge) processor**: 
+    > `bazel build --config=opt --copt=-march="ivybridge" --config=mkl //tensorflow/tools/pip_package:build_pip_package`
+    
+    - **ThinkPad X201, with a Core i5-540M (Westmere) processor**: 
+    > `bazel build --config=opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package`
 
 * * *
 
