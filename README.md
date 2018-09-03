@@ -42,20 +42,15 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 
 * * *
 
-# NOTES ARE STILL WIP
+# NOTES ARE STILL WIP :construction:
 
 # Notes on Building TF, and setting up your environment
-Quite a few people have asked me how I build TF, and I myself found the resources online to be either incomplete or even incorrect when I was first learning. So I took some notes on the process, which are really my own notes that I referenced while building.
+Quite a few people have asked me how I build TF, and I myself found the resources online to be either incomplete or even incorrect when I was first learning. So I took some notes on the process.
 
-**Disclaimer**: There are very likely to be assumptions about your installation or setup that I have not made explicit. Every fresh install I do of \*buntu comes with a litany of library and binaries setup, so it's possible there are more than a few boxes checked by the time I build TF that have not been mentioned here. YMMV.
+## The quick and dirty rundown
+#### Preparing your environment 
+If you haven't setup your environment yet, you can take a look at my more general environment setup notes on that below. But Here's the quick rundown:
 
-## Building TensorFlow from source
-Why? You probably got those warnings about tensorflow not being optimized for certain instruction sets from tf when you initialized your tf session. Or maybe you wanted support for other services, platforms, or libraries. Maybe you just want a bespoke tensorflow for your exact setup.
-
-The build process is not trivial, but if you've managed to setup all the dependencies and have gone through the build process a few times, it is fairly straightfoward.
-
-
-**Preparing your environment**: If you haven't setup your environment yet, you can take a look at my more general environment setup notes on that below. But Here's the quick rundown:
 - Install GCC-7 (GCC-8 is not supported by TF, and anything less than GCC-7 will not support `-march=skylake`)
 - Setup your python environment (I highly suggest [pyenv](https://github.com/pyenv/pyenv))
   - Make sure you have `keras` installed, else your build will fail at the very end and you will be heartbroken
@@ -66,9 +61,127 @@ The build process is not trivial, but if you've managed to setup all the depende
   - (optionally setup TensorRT)
 - (optionally install MKL)
 - Install Bazel (I chose the `apt` method over source)
-- Clone the tensorflow repo: `git clone --depth=1 https://github.com/tensorflow/tensorflow.git`
 
-You are now ready to smash that configure.
+#### Tensorflow configuration and build: You've finished setup; now it's time for building TF.
+First, clone the tensorflow source
+```bash
+#==== Clone tensorflow source
+git clone --depth=1 https://github.com/tensorflow/tensorflow.git && cd tensorflow
+```
+Now, build tensorflow based on your needs
+
+##### Simple build: no need for ./configure, (the majority of cases)
+Go this route if the following sounds true:
+- I don't need XLA JIT, GDR, VERBS, OpenCL SYSCL, or MPI support
+- I don't need GPU (CUDA) support
+  - Or, I need GPU support, and I have CUDA 9.0 and don't need TensorRT
+
+```bash
+# "I don't need GPU support, nor XLA JIT, GDR, VERBS, OpenCL SYSCL, MPI support"
+bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package
+
+# But I wanted MKL support!
+bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package
+
+# But it's for my old-ass, 1st-gen Core i*, thinkpad!
+bazel build -c opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package
+
+# "I have vanilla CUDA 9, no TensorRt, oh and let's do MKL just for kicks"
+bazel build --config=opt --config=cuda --config=mkl //tensorflow/tools/pip_package:build_pip_package
+```
+##### Specialized build: ./configure
+You'll probably know if you need to go this route. But do so if the following sounds true:
+- I need XLA JIT, GDR, VERBS, OpenCL SYSCL, or MPI support
+- I'm a weirdo and want to use clang as my compiler
+- I need GPU support for my CUDA 9.2, TensorRT setup
+- I have a non-geforce, Nvidia GPU (or any nvidia GPU with a compute capability different from 6.1)
+
+`./configure` is actually pretty straightforward. Just answer y/n for the stuff you want, and provide any additional info it may ask for your use-case.
+```bash
+# eg: I want XLA JIT
+Do you wish to build TensorFlow with XLA JIT support? [y/N]: y
+
+# I want nGraph
+Do you wish to build TensorFlow with nGraph support? [y/N]: y
+```
+
+**CUDA options**:
+```
+# I'm on CUDA 9.2
+Please specify the CUDA SDK version you want to use. [Leave empty to default to CUDA 9.0]: 9.2
+
+# Default for paths (DO NOT PUT /usr/local/cuda-9-2 !)
+Please specify the location where CUDA 9.2 toolkit is installed. Refer to README.md for more details. [Default is /usr/local/cuda]:
+
+Please specify the cuDNN version you want to use. [Leave empty to default to cuDNN 7.0]: 7.2
+
+Please specify the location where cuDNN 7 library is installed. Refer to README.md for more details. [Default is /usr/local/cuda]:
+
+# TensorRT
+Do you wish to build TensorFlow with TensorRT support? [y/N]: y
+
+Please specify the location where TensorRT is installed. [Default is /usr/lib/x86_64-linux-gnu]:
+
+# NCCL: I use 1.3, so that's what I specify
+Please specify the NCCL version you want to use. If NCCL 2.2 is not installed, then you can use version 1.3 that can be fetched automatically but it may have worse performance with multiple GPUs. [Default is 2.2]: 1.3
+
+# CUDA compute capability: just do whatever your card is rated for, mine's 6.1
+Please specify a list of comma-separated Cuda compute capabilities you want to build with.
+You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.
+Please note that each additional compute capability significantly increases your build time and binary size. [Default is: 6.1]:
+```
+
+
+**Hey... What about that one line though? The optimization flags?**
+```bash
+Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]:
+```
+Don't push shit here, just smash that enter key. Anything you would pass here is either automatically handled by your answers in ./configure, or specified to the bazel build args
+
+##### Once you've finished ./configuration, just call bazel build
+`bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
+If you built for CUDA or whatever, it's already been setup. There's no need to specify it as a config option again, nor is there any need to list out all the ISA extensions (SSE4.2, AVX, etc.). That's all handled by -march=native (that line you were SUPPOSED to default). If you want mkl, you can ``bazel build --config=opt --config=mkl`
+
+#### Finally: build the pip wheel
+`bazel-bin/tensorflow/tools/pip_package/build_pip_package ~/`
+I like just putting the pip whl in home, but put it wherever you want.
+
+
+* * *
+
+## The extended guide to setup and building
+If you've been having trouble with setup or building TF, or you're new to this sort of thing, or you just want to see my method, then I hope you find these extended notes helpful.
+
+### The general setup
+While the build guides below (wrt the actual TF configuration and build) are fairly system-invariant for Linux OS, the build guides below assume the following setup.
+
+:warning:**Disclaimer**:warning:: There are very likely to be assumptions about your installation or setup that I have not made explicit. Every fresh install I do of \*buntu comes with a litany of library and binaries setup, so it's possible there are more than a few boxes checked by the time I build TF that have not been mentioned here. YMMV.
+
+- **\*Buntu 16.04**: Xenial Ubuntu has native support from all the libraries and software you need for your deep-learning env. From my own experience, it's also probably the most stable, solid distro I've ever used, even amongst other buntu LTS releases.
+  - [Xubuntu](https://xubuntu.org/): my recommendation for Ubuntu. It's an official flavor of Ubuntu that has a very clean, lightweight desktop environment (XFCE), without most of the bloat from vanilla Ubuntu. With the exception of certain desktop-related items (like panel plugins or windows managers), everything that applies to Ubuntu applies to Xubuntu.
+  - **Why not 18.04?** Pain. Suffering. Agony. I've tried 18.04 a few times now, as well as the point release 18.04.1, and it's just a headache. For many libraries or software I use, 18.04 was no different then Xenial. But for certain items, it was impossibly broken and unsupported, and even fundamental system settings, like grub, display, and kernel were broken out of the box [1](https://askubuntu.com/questions/1030867/how-to-diagnose-fix-very-slow-boot-on-ubuntu-18-04)[2](https://askubuntu.com/questions/1053531/18-04-slow-boot-and-black-screen-on-boot-before-reaching-login-splash)[3](https://askubuntu.com/questions/1051762/long-boot-delay-on-ubuntu-loading-splash-screen-following-regular-dist-upgrade-o)[4](https://bugs.launchpad.net/ubuntu/+source/plymouth/+bug/1769309)[5](https://bugs.launchpad.net/ubuntu/+source/gdm3/+bug/1779476). On my most recent attempt at 18.04.1, after realizing how [FUBAR](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053) [Nvidia driver support alone](https://askubuntu.com/questions/1032938/trying-to-install-nvidia-driver-for-ubuntu-desktop-18-04-lts) [is](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053) is, not even being able to reach CUDA/cuDNN setup, I decided I'd just wait until I see an official CUDA package for 18.04 from Nvidia. However, **if you are not installing CUDA libraries** and you're not afraid to pass through dependency hell, 18.04 will likely suit your needs. But, keep in mind:
+    - Bazel does not support 18.04 (Bazel is required for building TensorFlow)
+    - CUDA and it's libraries does not support 18.04 (CUDA is optional)
+    - Intel MKL does not support 18.04 (MKL is optional)
+- [**Properly configured python environment**](#setting-up-your-python-environment): You need to have your python environment setup before you build TF. This guide is predicated on a virtualenv setup through [pyenv](https://github.com/pyenv/pyenv) and building for **Python 3**, specifically 3.6, which is the latest Python version supported by TensorFlow (3.7 not yet supported at time of writing). If you already have your python setup, and understand library pathing, then you should be fine. Using system site-packages and libraries (stuff rooted in /usr) for python is STRONGLY DISCOURAGED.
+  - Make sure you have the `Keras` and `wheel` packages installed, else your TF build will fail. There may be other packages needed, but I generally have my whole python environment setup by the time I install tensorflow so I'm not sure what other packages may be essential. It's probably a good idea to have `numpy` installed before building.
+- [**Bazel**](#installing-bazel): required for building tensorflow. Installation is straightforward, and you have a few options. I prefer the APT repo method; it's brainlessly easy, automatically updates, doesn't have a fat binary in `$HOME`, and does not need any path updates in shell config.
+- **OPTIONAL SETUP**: the following software need not be installed to build tensorflow from source, but is *highly* recommended if you have supporting hardware.
+  - **CUDA**:
+    - **cuDNN**:
+    - **TensorRT**:
+  - **MKL**:
+    - NB: While all my GPU builds are configured to support MKL, in reality, TF does not utilize MKL when it is optimized for GPU usage. 
+- **Latest tensorflow source clone**: `git clone --depth=1 https://github.com/tensorflow/tensorflow.git`
+
+* * *
+
+
+# Building TensorFlow from source
+Why? You probably got those warnings about tensorflow not being optimized for certain instruction sets from tf when you initialized your tf session. Or maybe you wanted support for other services, platforms, or libraries. Maybe you just want a bespoke tensorflow for your exact setup.
+
+The build process is not trivial, but if you've managed to setup all the dependencies and have gone through the build process a few times, it is fairly straightfoward.
+
 
 ### Understanding optimization flags
 Since most people (myself included) decided to build from source, or find optimized wheels, because they got the `The TensorFlow Library wasn't compiled to use X instructions, but these are available on your machine and could speed up CPU computations` warnings on session init, I'll explain how to build TF so that you get all those instructions.
@@ -106,9 +219,10 @@ Yes. In my experience, there are two situations in which you will specify additi
     - **ThinkPad T430, with a Core i5-3320M (Ivybridge) processor**: `bazel build --config=opt --copt=-march="ivybridge" --config=mkl //tensorflow/tools/pip_package:build_pip_package`
     - **ThinkPad X201, with a Core i5-540M (Westmere) processor**: `bazel build --config=opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package`
 
+* * *
 
+# Library installation and environment setup notes
 
-# Environment setup and library installation notes
 ## GCC setup
 It's not necessary to update GCC, at least for building tensorflow. But if your CPU is newer than Broadwell, your GCC -march=native is likely configured for broadwell (which doesn't actually matter, see below). Only `gcc-7` and above support newer architectures. You should be on `gcc-8`. But when you are building tensorflow, make sure you switch to `gcc-7`, as `gcc-8` is not yet a supported compiler for tensorflow.
 
@@ -125,7 +239,7 @@ If you are interested in what instruction sets are supported by what architectur
 
 
 
-Follow these instructions to install both GCC versions, and to be able to switch between them.
+### Follow these instructions to install both GCC versions, and to be able to switch between them.
 
 ```bash
 #==== Install PPA
@@ -145,8 +259,10 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /u
 sudo update-alternatives --config gcc
 ```
 
+* * * 
+
 ## Setting up your python environment
-Use [`pyenv`](https://github.com/pyenv/pyenv).
+Use [`pyenv`](https://github.com/pyenv/pyenv). If you got yourself setup with another python environment manager, and understand python system-site packages pathing, then you can probably skip this part. But I would recommend against using actual /usr rooted python libraries.
 ```bash
 #==== First, dependencies
 sudo apt install -y curl apt-transport-https cmake make git-core autoconf automake build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget llvm libncurses5-dev xz-utils tk-dev
@@ -166,8 +282,28 @@ pyenv virtualenv 3.6.6 my_virtualenv_name
 pyenv local my_virtualenv_name
 pip install -U pip setuptools
 pip install wheel numpy scipy keras # MUST install wheel and keras for tf to build successfully
+
+#==== Confirming installation
+# If everything has been configured properly, you should see the python pathing has changed
+$ which python
+/home/$USER/.pyenv/shims/python
+
+$ python -V
+Python 3.6.6
+
+$ python
+Python 3.6.6 (default, Sep  1 2018, 22:11:55) 
+[GCC 8.1.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>> print('All set!')
+All set!
 ```
 
+* * *
+
+## Installing Bazel
+
+* * *
 
 ## Installing CUDA, cuDNN, TensorRT
 Great, now that you have your python environment setup, let's setup your GPU enviroment if you have one. I'd love to include the CUDA, cuDNN, and TensorRT files to this repo as releases, but it would likely violate some legal stuff with Nvidia so you'll have to source those files yourself.
@@ -238,6 +374,7 @@ dpkg -l | grep TensorRT
 
 All done with the GPU environment!
 
+* * *
 
 ## Installing MKL
 **The following MKL installation guide was copied, verbatim, from TinyMind (https://github.com/mind) at https://github.com/mind/wheels#mkl. That's where I got my wheels before I started building my own. Make sure to check them out!*
@@ -255,6 +392,8 @@ sudo make install
 
 echo 'export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib' >> ~/.bashrc
 ```
+
+* * *
 
 ## License:
 Except where noted, the written content of this repo, is licensed as [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 License](https://creativecommons.org/licenses/by-nc-sa/4.0/), while any software/code is licensed as BSD-3.
