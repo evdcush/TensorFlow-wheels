@@ -44,7 +44,7 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 Quite a few people have asked me how I build TF, and I myself found the resources online to be either incomplete or even incorrect when I was first learning. So I took some notes on the process.
 
 # The quick and dirty rundown
-If you'd like more detailed steps, checkout the [extended setup guide](#env-setup-guide).
+If you'd like more detailed steps, checkout the [extended setup guide](env-setup-guide.md).
 
 ## Preparing your environment
 - **Install GCC-7** (GCC-8 is not supported by TF, and anything less than GCC-7 will not support `-march=skylake`)
@@ -147,8 +147,8 @@ I like just putting the pip whl in home, but put it wherever you want.
 
 * * *
 
-# The extended guide to setup and building
-If you've been having trouble with setup or building TF, or you're new to this sort of thing, or you just want to see my method, then checkout my [extended setup guide](#env-setup-guide.md) which has detailed steps on the process, from GCC to Python env to CUDA and MKL.
+### The extended guide to setup and building
+If you've been having trouble with setup or building TF, or you're new to this sort of thing, or you just want to see my method, then checkout my [extended setup guide](env-setup-guide.md) which has detailed steps on the process, from GCC to Python env to CUDA and MKL.
 
 
 ## License:
