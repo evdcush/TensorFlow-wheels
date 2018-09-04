@@ -48,7 +48,7 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 Quite a few people have asked me how I build TF, and I myself found the resources online to be either incomplete or even incorrect when I was first learning. So I took some notes on the process.
 
 ## The quick and dirty rundown
-#### Preparing your environment 
+#### Preparing your environment
 If you haven't setup your environment yet, you can take a look at my more general environment setup notes on that below. But Here's the quick rundown:
 
 - Install GCC-7 (GCC-8 is not supported by TF, and anything less than GCC-7 will not support `-march=skylake`)
@@ -136,7 +136,7 @@ Please note that each additional compute capability significantly increases your
 ```bash
 Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]:
 ```
-Don't push shit here, just smash that enter key. Anything you would pass here is either automatically handled by your answers in ./configure, or specified to the bazel build args
+Don't put anything here, just smash that enter key. Anything you would pass here is either automatically handled by your answers in ./configure, or specified to the bazel build args
 
 ##### Once you've finished ./configuration, just call bazel build
 `bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
@@ -172,7 +172,7 @@ While the build guides below (wrt the actual TF configuration and build) are fai
     - **cuDNN**:
     - **TensorRT**:
   - **MKL**:
-    - NB: While all my GPU builds are configured to support MKL, in reality, TF does not utilize MKL when it is optimized for GPU usage. 
+    - NB: While all my GPU builds are configured to support MKL, in reality, TF does not utilize MKL when it is optimized for GPU usage.
 - **Latest tensorflow source clone**: `git clone --depth=1 https://github.com/tensorflow/tensorflow.git`
 
 * * *
@@ -201,13 +201,13 @@ The most common method you will see when googling around is explicitly passing t
 > `Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]: -msse4.1 -msse4.2 -mavx -mavx2 -mfma`
 
 #### The just letting the build default do it for you automatically way
-There's no reason you need to specify any of those instructions to the build configuration. It will do it for you by default. Note that the configuration default for optimization flags is said to be `-march=native`. 
+There's no reason you need to specify any of those instructions to the build configuration. It will do it for you by default. Note that the configuration default for optimization flags is said to be `-march=native`.
 
 `-march=native` means your native x86_64 microarchitecture--in other words, the instruction set supported by your CPU. So if you just don't specify anything to the tensorflow build config, it will automatically build tensorflow to be optimized for your machine via `-march=native`. In fact, the only way Tensorflow knows it was not compiled to use those instruction sets is because it checks the capabilities of your architecture by looking at what instructions are supported by GCC by `march=native` So if you got warnings for `SSE4.1, SSE4.2, AVX, AVX2, FMA`, it's because your `march=native` says you can do them.
 
-**so just leave --config=opt alone. It will automatically build for your instructions by it's default -march=native** 
+**so just leave --config=opt alone. It will automatically build for your instructions by it's default -march=native**
 
-I have never put anything for the line `Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]:`. 
+I have never put anything for the line `Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]:`.
 
 ##### What about GPU builds? Do those change `--config` or `-march`?
 If you are building for GPU, then you will specify that in an earlier question, and `cuda` will be automatically included in `--config` by bazel. If you specify that again in the `./configure` process, or to `bazel build` like `bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package`, you will even get a warning saying it has already been specified and that duplicate commands may mess things up.
@@ -216,12 +216,12 @@ If you are building for GPU, then you will specify that in an earlier question, 
 Yes. In my experience, there are two situations in which you will specify additional config flags, though keep in mind that others who need more features or support or have special constraints will probably have their own `config` specs.
 
 - **MKL**: If you have `mkl` installed on your system, you will want to specify that the bazel build like, eg: `bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package` I believe the bazel std:out even mentions this.
-- **a non-native -march**: If you are building tensorflow for a different machine, perhaps one that does not have the same processor architecture as the build machine, then you will want to specify that `march`. 
+- **a non-native -march**: If you are building tensorflow for a different machine, perhaps one that does not have the same processor architecture as the build machine, then you will want to specify that `march`.
   - For instance, I also build tensorflow for two other machines, my thinkpads, which have older processors. So, my typical build configs for my thinkpads look like this:
-    - **ThinkPad T430, with a Core i5-3320M (Ivybridge) processor**: 
+    - **ThinkPad T430, with a Core i5-3320M (Ivybridge) processor**:
     > `bazel build --config=opt --copt=-march="ivybridge" --config=mkl //tensorflow/tools/pip_package:build_pip_package`
-    
-    - **ThinkPad X201, with a Core i5-540M (Westmere) processor**: 
+
+    - **ThinkPad X201, with a Core i5-540M (Westmere) processor**:
     > `bazel build --config=opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package`
 
 * * *
@@ -255,7 +255,7 @@ sudo apt full-upgrade
 #==== Install gcc version
 sudo apt install gcc-7 g++-7 gcc-8 g++-8
 
-# slaving g++ to gcc version insures that the g++ version always matches current gcc, so 
+# slaving g++ to gcc version insures that the g++ version always matches current gcc, so
 #  you don't have to switch both
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 100 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /usr/bin/g++ g++ /usr/bin/g++-7
@@ -264,7 +264,7 @@ sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 60 --slave /u
 sudo update-alternatives --config gcc
 ```
 
-* * * 
+* * *
 
 ## Setting up your python environment
 Use [`pyenv`](https://github.com/pyenv/pyenv). If you got yourself setup with another python environment manager, and understand python system-site packages pathing, then you can probably skip this part. But I would recommend against using actual /usr rooted python libraries.
@@ -297,7 +297,7 @@ $ python -V
 Python 3.6.6
 
 $ python
-Python 3.6.6 (default, Sep  1 2018, 22:11:55) 
+Python 3.6.6 (default, Sep  1 2018, 22:11:55)
 [GCC 8.1.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
 >>> print('All set!')
