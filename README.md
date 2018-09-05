@@ -27,24 +27,26 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 |   1.8   | 3.6 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :x: | :x: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.8-cpu-ivybridge-MKL/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl     |
 |   1.8   | 3.6 | :heavy_check_mark: | :heavy_check_mark: |         :x:        |  :x: | :x: |         :x:        | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.8-cpu-westmere/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl          |
 
-* * *
 
-# Installing TensorFlow wheels:
 
-## Install wheel via pip
-### From the directory of the downloaded wheel:
+## Installing TensorFlow wheels:
+
+### Install wheel via pip
+#### From the directory of the downloaded wheel:
 `pip install --no-cache-dir tensorflow-<version>-cp36-cp36m-linux_x86_64.whl`
 
-### From the direct link to the wheel:
+#### From the direct link to the wheel:
 `pip install --no-cache-dir https://github.com/evdcush/TensorFlow-wheels/releases/download/<release>/tensorflow-<version>-cp36-cp36m-linux_x86_64.whl`
 
 * * *
 
+
+
 # Notes on Building TF, and setting up your environment
 Quite a few people have asked me how I build TF, and I myself found the resources online to be either incomplete or even incorrect when I was first learning. So I took some notes on the process.
 
-# The quick and dirty rundown
-If you'd like more detailed steps, checkout the [extended setup guide](env-setup-guide.md).
+The following guide is the quick and dirty rundown on building tf, and setting up your environment. For more detailed steps, checkout the [extended setup guide](env-setup-guide.md)
+
 
 ## Preparing your environment
 - **Install GCC-7** (GCC-8 is not supported by TF, and anything less than GCC-7 will not support `-march=skylake`)
