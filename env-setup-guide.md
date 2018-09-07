@@ -36,8 +36,8 @@ Clone the latest TensorFlow from the [official repo](https://github.com/tensorfl
 
 ### Optional Setup
 The following software need not be installed to build tensorflow from source, but is *highly* recommended if you have supporting hardware.
-- [CUDA, cuDNN, TensorRT](#installing-cuda,-cuDNN,-TensorRT): If you have a supported Nvidia GPU, I would say you must configure these libraries to accelerate TensorFlow, as well as many other ML frameworks.
-- [MKL](#Installing-MKL): Intel Math Kernel Library for Deep Neural Networks. Improves speed of DNN ops when running on CPU.
+- [CUDA, cuDNN, TensorRT](#installing-cuda-cudnn-tensorrt): If you have a supported Nvidia GPU, I would say you must configure these libraries to accelerate TensorFlow, as well as many other ML frameworks.
+- [MKL](#installing-mkl): Intel Math Kernel Library for Deep Neural Networks. Improves speed of DNN ops when running on CPU.
   - NB: While my GPU wheels are built with support for MKL, in reality, if tensorflow is bult for GPU, it does not actually use MKL. I do it anyway :sunglasses:.
 
 * * *
