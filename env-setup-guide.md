@@ -8,9 +8,11 @@ There are very likely to be assumptions about your installation or setup that I 
 ### \*Buntu 16.04
 Xenial Ubuntu has native support from all the libraries and software you need for your deep-learning env. From my own experience, it's also probably the most stable, solid distro I've ever used, even amongst other buntu LTS releases.
 - [**Xubuntu**](https://xubuntu.org/): my recommendation for Ubuntu. It's an official flavor of Ubuntu that has a very clean, lightweight desktop environment (XFCE), without most of the bloat from vanilla Ubuntu.
-> **Why not 18.04?**
+
+#### **Why not 18.04?**
+
 ### Pain :feelsgood:. Suffering :finnadie:. Agony :goberserk:
-I've tried 18.04 a few times now, as well as the point release 18.04.1, and it's just a headache. For many libraries or software I use, 18.04 was no different then Xenial. But for certain items, it was impossibly broken and unsupported, and even fundamental system settings, like grub, display, and kernel were broken out of the box [1](https://askubuntu.com/questions/1030867/how-to-diagnose-fix-very-slow-boot-on-ubuntu-18-04),[2](https://askubuntu.com/questions/1053531/18-04-slow-boot-and-black-screen-on-boot-before-reaching-login-splash),[3](https://askubuntu.com/questions/1051762/long-boot-delay-on-ubuntu-loading-splash-screen-following-regular-dist-upgrade-o),[4](https://bugs.launchpad.net/ubuntu/+source/plymouth/+bug/1769309)[5](https://bugs.launchpad.net/ubuntu/+source/gdm3/+bug/1779476). Current [support](https://askubuntu.com/questions/1032938/trying-to-install-nvidia-driver-for-ubuntu-desktop-18-04-lts) just for just nvidia [drivers](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053) is [FUBAR](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053). Personally, I will not move on to 18.04 until I see an official CUDA package from Nvidia.
+I've tried 18.04 a few times now, as well as the point release 18.04.1, and it's just a headache. For many libraries or software I use, 18.04 was no different then Xenial. But for certain items, it was impossibly broken and unsupported, and even fundamental system settings, like grub, display, and kernel were broken out of the box [1](https://askubuntu.com/questions/1030867/how-to-diagnose-fix-very-slow-boot-on-ubuntu-18-04),[2](https://askubuntu.com/questions/1053531/18-04-slow-boot-and-black-screen-on-boot-before-reaching-login-splash),[3](https://askubuntu.com/questions/1051762/long-boot-delay-on-ubuntu-loading-splash-screen-following-regular-dist-upgrade-o),[4](https://bugs.launchpad.net/ubuntu/+source/plymouth/+bug/1769309),[5](https://bugs.launchpad.net/ubuntu/+source/gdm3/+bug/1779476). Current [support](https://askubuntu.com/questions/1032938/trying-to-install-nvidia-driver-for-ubuntu-desktop-18-04-lts) just for just nvidia [drivers](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053) is [FUBAR](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053). Personally, I will not move on to 18.04 until I see an official CUDA package from Nvidia.
 - However, **if you are not installing CUDA libraries** and you're not afraid to pass through dependency hell, 18.04 will likely suit your needs. But, keep in mind:
     - Bazel does not support 18.04 (Bazel is required for building TensorFlow)
     - CUDA and it's libraries does not support 18.04 (CUDA is optional)
@@ -57,10 +59,9 @@ The build process is not trivial, but if you've managed to setup all the depende
 They all enhance or expand existing instruction set functionality. There are a whole bunch of other ISA (instruction set architecture) extensions, but the ones listed are the most significant and the only ones you'll be specifying to TF. (If you have a Kaby Lake or later Xeon, or a Cannon Lake processor, you also have AVX-512, which is another signficant extension.)
 
 ## So how can you build tensorflow to support these extensions?
-**TL;DR**: Don't do anything\
-Just use the default `-march=native` for `--config=opt`
+#### **TL;DR**: Don't do anything. Just use the default `-march=native` for `--config=opt`
 
-### Most popular: the "I want extra work for myself way"
+### Most popular: the "I want extra work for myself" way
 The most common method you will see when googling around is explicitly passing the instructions you want to `--config=opt`. eg:
 - Dispensing with `./configure` altogether and just specifying everything to bazel build:
 >`bazel build -c opt -copt=-msse4.1 --copt=-msse4.2 --copt=-mavx --copt=-mavx2 --copt=-mfma //tensorflow/tools/pip_package:build_pip_package`
@@ -68,7 +69,7 @@ The most common method you will see when googling around is explicitly passing t
 - Or, specifying the config optimization flags in `./configure`:
 > `Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]: -msse4.1 -msse4.2 -mavx -mavx2 -mfma`
 
-### The just letting the build default do it for you automatically way
+### The ""just letting the build default do it for you automatically" way
 There's no reason you need to specify any of those optimization flags to the build configuration (**even if you aren't building for your machine/`march`!**)
 
 #### Understanding `-march=native`
@@ -82,12 +83,13 @@ However, if your GCC version is older than v5, and you have a CPU newer than Bro
 
 **so just leave --config=opt alone. It will automatically build for your instructions by it's default -march=native**
 
+* * *
 
 ### What about GPU builds? Do those change `--config` or `-march`?
 If you are building for GPU, then you will specify that in an earlier question, and `cuda` will be automatically included in `--config` by bazel. If you specify that again in the `./configure` process, or to `bazel build` like `bazel build --config=opt --config=cuda //tensorflow/tools/pip_package:build_pip_package`, you will even get a warning saying it has already been specified and that duplicate commands may mess things up.
 
 ### So, is there any reason you would ever specify other config flags?
-Yes. In my experience, there are two situations in which you will specify additional config flags, though keep in mind that others who need more features or support or have special constraints will probably have their own `config` specs.
+Yes. **In my experience**, there are two situations in which you will specify additional config flags, though keep in mind that others who need more features or support or have special constraints will probably have their own `config` specs.
 
 - **MKL**: If you have `mkl` installed on your system, you will want to specify that the bazel build like, eg: `bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package` I believe the bazel std:out even mentions this.
 - **a non-native -march**: If you are building tensorflow for a different machine, perhaps one that does not have the same processor architecture as the build machine, then you will want to specify that `march`.
@@ -141,7 +143,7 @@ sudo update-alternatives --config gcc
 * * *
 
 # Setting up your python environment
-Use [`pyenv`](https://github.com/pyenv/pyenv).
+### Use [`pyenv`](https://github.com/pyenv/pyenv).
 If you got yourself setup with another python environment manager, and understand python system-site packages pathing, then you can probably skip this part.
 
 ```bash
@@ -188,12 +190,15 @@ WIP (it's ez tho :ok_hand:)
 * * *
 
 # Installing CUDA, cuDNN, TensorRT
-Great, now that you have your python environment setup, let's setup your GPU enviroment if you have one. I'd love to include the CUDA, cuDNN, and TensorRT files to this repo as releases, but it would likely violate some legal stuff with Nvidia so you'll have to source those files yourself.
+Great, now that you have your python environment setup, let's setup your GPU enviroment if you have one. I'd love to include the CUDA, cuDNN, and TensorRT files to this repo as releases, but given cuDNN and TensorRT both lie behind an account authentication wall, I'd rather not risk some licence/legal stuff.
 
 ## Cuda
-I am assuming a clean build here (from a fresh install). If you have a preexisting CUDA installation, or nvidia drivers, the process is somewhat more complicated and you should consult the installation guides.
+I am assuming a clean build here (from a fresh install).\
+If you have a preexisting CUDA installation, or nvidia drivers, the process is somewhat more complicated and you should consult the installation guides.
 
 Remember to use your own file names! The ones listed below were simply the current versions at the time of writing.
+
+###  Installation
 
 ```bash
 #==== Install CUDA deb
@@ -217,18 +222,23 @@ export LD_LIBRARY_PATH=/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY
 
 # Reboot machine to finish installation
 reboot
+```
 
-# Verify successful installation
+#### Now that CUDA should have installed, let's verify our installation
+You want to enter `nvcc -V` (nvidia driver) and `nvidida-smi` into your command line. Here's what the output should look like (your case will of course be different).
+
+```bash
+#==== Verify nvidia driver
 nvcc -V
-# What you should see:
+
 nvcc: NVIDIA (R) Cuda compiler driver
 Copyright (c) 2005-2018 NVIDIA Corporation
 Built on Tue_Jun_12_23:07:04_CDT_2018
 Cuda compilation tools, release 9.2, V9.2.148
-# nvcc good!
 
+#===== Verify GPU processes
 nvidia-smi
-# What you should see:
+
 Wed Sep  5 13:29:47 2018
 +-----------------------------------------------------------------------------+
 | NVIDIA-SMI 396.44                 Driver Version: 396.44                    |
