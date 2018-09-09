@@ -76,18 +76,18 @@ Go this route if the following sounds true:
 
 
 - "I don't need GPU support, nor XLA JIT, GDR, VERBS, OpenCL SYSCL, MPI support"
->`bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
+  - `bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
 
 - "But I wanted MKL support!"
-> `bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package`
+  - `bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package`
 
 - "I'm actually building for my old-ass, 1st-gen Core i\*, thinkpad"
-> `bazel build -c opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package`
-  - [*complete list of GCC march options*](https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html#x86-Options)
+  - `bazel build -c opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package`
+    - [*complete list of GCC march options*](https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html#x86-Options)
 
 - "I have vanilla CUDA 9, no TensorRt, oh and let's do MKL just for kicks"
-> `bazel build --config=opt --config=cuda --config=mkl //tensorflow/tools/pip_package:build_pip_package`
-  - I say "just for kicks" because [mkl does nt work when also using `--config=cuda`](https://github.com/tensorflow/docs/blob/master/site/en/performance/performance_guide.md#optimizing-for-cpu). I always build my GPU wheels with MKL anyway, :sunglasses: :ok_hand:
+  - `bazel build --config=opt --config=cuda --config=mkl //tensorflow/tools/pip_package:build_pip_package`
+    - I say "just for kicks" because [mkl does nt work when also using `--config=cuda`](https://github.com/tensorflow/docs/blob/master/site/en/performance/performance_guide.md#optimizing-for-cpu). I always build my GPU wheels with MKL anyway, :sunglasses: :ok_hand:
 
 
 
