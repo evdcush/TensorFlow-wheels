@@ -68,30 +68,32 @@ git clone --depth=1 https://github.com/tensorflow/tensorflow.git && cd tensorflo
 ```
 Now, build tensorflow based on your needs
 
-### Simple build: no need for ./configure, (the majority of cases)
+## Simple build: no need for ./configure, (the majority of cases)
 Go this route if the following sounds true:
 - I don't need XLA JIT, GDR, VERBS, OpenCL SYSCL, or MPI support
 - I don't need GPU (CUDA) support
   - Or, I need GPU support, and I have CUDA 9.0 and don't need TensorRT
 
-```bash
-# "I don't need GPU support, nor XLA JIT, GDR, VERBS, OpenCL SYSCL, MPI support"
-bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package
 
-# But I wanted MKL support!
-bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package
+- "I don't need GPU support, nor XLA JIT, GDR, VERBS, OpenCL SYSCL, MPI support"
+>`bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
 
-# But it's for my old-ass, 1st-gen Core i*, thinkpad!
-bazel build -c opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package
+- "But I wanted MKL support!"
+> `bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package`
 
-# "I have vanilla CUDA 9, no TensorRt, oh and let's do MKL just for kicks"
-bazel build --config=opt --config=cuda --config=mkl //tensorflow/tools/pip_package:build_pip_package
-```
+- "I'm actually building for my old-ass, 1st-gen Core i\*, thinkpad"
+> `bazel build -c opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package`
+  - [*complete list of GCC march options*](https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html#x86-Options)
+
+- "I have vanilla CUDA 9, no TensorRt, oh and let's do MKL just for kicks"
+> `bazel build --config=opt --config=cuda --config=mkl //tensorflow/tools/pip_package:build_pip_package`
+  - I say "just for kicks" because [mkl does nt work when also using `--config=cuda`](https://github.com/tensorflow/docs/blob/master/site/en/performance/performance_guide.md#optimizing-for-cpu). I always build my GPU wheels with MKL anyway, :sunglasses: :ok_hand:
+
+
 
 ## Specialized build: ./configure
 You'll probably know if you need to go this route. But do so if the following sounds true:
 - I need XLA JIT, GDR, VERBS, OpenCL SYSCL, or MPI support
-- I'm a weirdo and want to use clang as my compiler
 - I need GPU support for my CUDA 9.2, TensorRT setup
 - I have a non-geforce, Nvidia GPU (or any nvidia GPU with a compute capability different from 6.1)
 
@@ -135,9 +137,10 @@ Please note that each additional compute capability significantly increases your
 ```bash
 Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]:
 ```
-Don't put anything here, just smash that enter key. Anything you would pass here is either automatically handled by your answers in ./configure, or specified to the bazel build args
+**Don't put anything here**, just smash that enter key.
+Anything you would pass here is either automatically handled by your answers in ./configure, or specified to the bazel build args
 
-## Once you've finished ./configuration, just call bazel build
+### Once you've finished ./configuration, just call bazel build
 `bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
 
 If you built for CUDA or whatever, it's already been setup. There's no need to specify it as a config option again, nor is there any need to list out all the ISA extensions (SSE4.2, AVX, etc.). That's all handled by -march=native (that line you were SUPPOSED to default). If you want mkl, you can `bazel build --config=opt --config=mkl`
