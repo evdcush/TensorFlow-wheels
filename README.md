@@ -43,7 +43,7 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 
 
 # Notes on Building TF, and setting up your environment
-Quite a few people have asked me how I build TF, and I myself found the resources online to be either incomplete or even incorrect when I was first learning. So I took some notes on the process.
+Quite a few people have asked me how I build TF, and I myself found the resources online to be either incomplete or even incorrect when I was first learning. So I took some notes on my own process. I've managed to reach some degree of consistency when building in the manner described, but YMMV.
 
 The following guide is the quick and dirty rundown on building tf, and setting up your environment. For more detailed steps, checkout the [extended setup guide](env-setup-guide.md)
 
@@ -68,7 +68,14 @@ git clone --depth=1 https://github.com/tensorflow/tensorflow.git && cd tensorflo
 ```
 Now, build tensorflow based on your needs
 
-## Simple build: no need for ./configure, (the majority of cases)
+## Simple build: no need for ./configure
+**NOTE, Update:** *Guide is outdated for older machines*.
+Previously (tf < v1.11.0), entering configure was mostly unnecessary for the majority of use cases. Lately, I've been having build issues with skipping `configure` when trying to build for older machines (from newer architecture).
+It looks like this is because the TF build process is looking for the *actual* `system-site-packages` for python, and will not path to a `virtualenv`. Even when you do go through `configure` and specify `-march=ivybridge`, it will build successfully, but will not actually be built for Ivy Bridge.
+
+I will update the guide when I've figured out the issues with building for different architectures (`march`). *The guide should still be valid for modern machines*.
+
+
 Go this route if the following sounds true:
 - I don't need XLA JIT, GDR, VERBS, OpenCL SYSCL, or MPI support
 - I don't need GPU (CUDA) support
@@ -84,7 +91,7 @@ Go this route if the following sounds true:
 
 
 #### *"I'm actually building for my old-ass, 1st-gen Core i\*, thinkpad"*
-:point_right: `bazel build -c opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package`
+:point_right: `bazel build --copt=-march="westmere" -c opt //tensorflow/tools/pip_package:build_pip_package`
   - [*complete list of GCC march options*](https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html#x86-Options)
 
 

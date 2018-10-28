@@ -94,10 +94,10 @@ Yes. **In my experience**, there are two situations in which you will specify ad
 - **a non-native -march**: If you are building tensorflow for a different machine, perhaps one that does not have the same processor architecture as the build machine, then you will want to specify that `march`.
   - For instance, I also build tensorflow for two other machines, my thinkpads, which have older processors. So, my typical build configs for my thinkpads look like this:
     - **ThinkPad T430, with a Core i5-3320M (Ivybridge) processor**:
-    > `bazel build --config=opt --copt=-march="ivybridge" --config=mkl //tensorflow/tools/pip_package:build_pip_package`
+    > `bazel build --copt=-march="ivybridge" --config=mkl -c opt //tensorflow/tools/pip_package:build_pip_package`
 
     - **ThinkPad X201, with a Core i5-540M (Westmere) processor**:
-    > `bazel build --config=opt --copt=-march="westmere" //tensorflow/tools/pip_package:build_pip_package`
+    > `bazel build --copt=-march="westmere" -c opt //tensorflow/tools/pip_package:build_pip_package`
 
 * * *
 
