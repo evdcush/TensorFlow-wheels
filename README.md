@@ -29,21 +29,25 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 
 
 
-## Installing TensorFlow wheels:
+# Installing TensorFlow wheels:
 
-### Install wheel via pip
-#### From the directory of the downloaded wheel:
+## Install wheel via pip
+### From the directory of the downloaded wheel:
+
 `pip install --no-cache-dir tensorflow-<version>-cp36-cp36m-linux_x86_64.whl`
 
-#### From the direct link to the wheel:
+### From the direct link to the wheel:
+
 `pip install --no-cache-dir https://github.com/evdcush/TensorFlow-wheels/releases/download/<release>/tensorflow-<version>-cp36-cp36m-linux_x86_64.whl`
 
 * * *
 
+* * *
 
 
-# Notes on Building TF, and setting up your environment
+# Notes on Building TF from Source: making your own wheel :wrench:
 Quite a few people have asked me how I build TF, and I myself found the resources online to be either incomplete or even incorrect when I was first learning. So I took some notes on my own process. I've managed to reach some degree of consistency when building in the manner described, but YMMV.
+
 
 The following guide is the quick and dirty rundown on building tf, and setting up your environment. For more detailed steps, checkout the [extended setup guide](env-setup-guide.md)
 
@@ -60,7 +64,11 @@ The following guide is the quick and dirty rundown on building tf, and setting u
 - (optionally install MKL)
 - **Install Bazel** (I chose the `apt` method over source)
 
-### Tensorflow configuration and build: You've finished setup; now it's time for building TF.
+* * *
+
+# Tensorflow configuration and build
+You've finished setup; now it's time for building TF.
+
 First, clone the tensorflow source
 ```bash
 #==== Clone tensorflow source
@@ -68,6 +76,7 @@ git clone --depth=1 https://github.com/tensorflow/tensorflow.git && cd tensorflo
 ```
 Now, build tensorflow based on your needs
 
+<<<<<<< HEAD
 ## Simple build: no need for ./configure
 **NOTE, Update:** *Guide is outdated for older machines*.
 Previously (tf < v1.11.0), entering configure was mostly unnecessary for the majority of use cases. Lately, I've been having build issues with skipping `configure` when trying to build for older machines (from newer architecture).
@@ -75,34 +84,45 @@ It looks like this is because the TF build process is looking for the *actual* `
 
 I will update the guide when I've figured out the issues with building for different architectures (`march`). *The guide should still be valid for modern machines*.
 
+=======
+## Simple build: no need for ./configure, (the majority of cases)
+>>>>>>> 7be410acf6be11c410e902224f056968906221c8
 
 Go this route if the following sounds true:
 - I don't need XLA JIT, GDR, VERBS, OpenCL SYSCL, or MPI support
 - I don't need GPU (CUDA) support
   - Or, I need GPU support, and I have CUDA 9.0 and don't need TensorRT
 
-### Build examples:
-#### *"I don't need GPU support, nor XLA JIT, GDR, VERBS, OpenCL SYSCL, MPI support"*
+## Build examples:
+
+### *"I don't need GPU support, nor XLA JIT, GDR, VERBS, OpenCL SYSCL, MPI support"*
+
 :point_right: `bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
 
+* * *
 
-#### *"But I wanted MKL support!"*
+### *"But I wanted MKL support!"*
+
 :point_right: `bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package`
 
+* * *
 
-#### *"I'm actually building for my old-ass, 1st-gen Core i\*, thinkpad"*
+### *"I'm actually building for my old-ass, 1st-gen Core i\*, thinkpad"*
 :point_right: `bazel build --copt=-march="westmere" -c opt //tensorflow/tools/pip_package:build_pip_package`
   - [*complete list of GCC march options*](https://gcc.gnu.org/onlinedocs/gcc/x86-Options.html#x86-Options)
 
+* * *
 
-#### *"I have vanilla CUDA 9, no TensorRt, oh and let's do MKL just for kicks"*
+### *"I have vanilla CUDA 9, no TensorRt, oh and let's do MKL just for kicks"*
+
 :point_right: `bazel build --config=opt --config=cuda --config=mkl //tensorflow/tools/pip_package:build_pip_package`
   - I say "just for kicks" because [mkl does nt work when also using `--config=cuda`](https://github.com/tensorflow/docs/blob/master/site/en/performance/performance_guide.md#optimizing-for-cpu). I always build my GPU wheels with MKL anyway, :sunglasses: :ok_hand:
 
 
-
+* * *
 
 ## Specialized build: ./configure
+
 You'll probably know if you need to go this route. But do so if the following sounds true:
 - I need XLA JIT, GDR, VERBS, OpenCL SYSCL, or MPI support
 - I need GPU support for my CUDA 9.2, TensorRT setup
@@ -117,7 +137,7 @@ Do you wish to build TensorFlow with XLA JIT support? [y/N]: y
 Do you wish to build TensorFlow with nGraph support? [y/N]: y
 ```
 
-#### CUDA options:
+## CUDA options:
 ```
 # I'm on CUDA 9.2
 Please specify the CUDA SDK version you want to use. [Leave empty to default to CUDA 9.0]: 9.2
@@ -144,14 +164,20 @@ Please note that each additional compute capability significantly increases your
 ```
 
 
-### Hey... What about that one line though? The optimization flags?
+## Hey... What about that one line though? The optimization flags?
 ```bash
 Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]:
 ```
-**Don't put anything here**, just smash that enter key.
+
+
+**Don't put anything here**, just smash that enter key :hammer:
+
 Anything you would pass here is either automatically handled by your answers in ./configure, or specified to the bazel build args
 
+
+
 ### Once you've finished ./configuration, just call bazel build
+
 `bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
 
 If you built for CUDA or whatever, it's already been setup. There's no need to specify it as a config option again, nor is there any need to list out all the ISA extensions (SSE4.2, AVX, etc.). That's all handled by -march=native (that line you were SUPPOSED to default). If you want mkl, you can `bazel build --config=opt --config=mkl`
