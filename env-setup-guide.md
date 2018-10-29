@@ -6,22 +6,20 @@ There are very likely to be assumptions about your installation or setup that I 
 
 * * *
 
-### \*Buntu 16.04
+## \*Buntu 16.04 OR 18.04
+
+### `16.04`
 Xenial Ubuntu has native support from all the libraries and software you need for your deep-learning env. From my own experience, it's also probably the most stable, solid distro I've ever used, even amongst other buntu LTS releases.
 - [**Xubuntu**](https://xubuntu.org/): my recommendation for Ubuntu. It's an official flavor of Ubuntu that has a very clean, lightweight desktop environment (XFCE), without most of the bloat from vanilla Ubuntu.
 
-#### **"Why not 18.04??"** Pain :feelsgood:. Suffering :finnadie:. Agony :goberserk:
-I've tried 18.04 a few times now, as well as the point release 18.04.1, and it's just a headache. For many libraries or software I use, 18.04 was no different then Xenial. But for certain items, it was impossibly broken and unsupported, and even fundamental system settings, like grub, display, and kernel were broken out of the box [1](https://askubuntu.com/questions/1030867/how-to-diagnose-fix-very-slow-boot-on-ubuntu-18-04),[2](https://askubuntu.com/questions/1053531/18-04-slow-boot-and-black-screen-on-boot-before-reaching-login-splash),[3](https://askubuntu.com/questions/1051762/long-boot-delay-on-ubuntu-loading-splash-screen-following-regular-dist-upgrade-o),[4](https://bugs.launchpad.net/ubuntu/+source/plymouth/+bug/1769309),[5](https://bugs.launchpad.net/ubuntu/+source/gdm3/+bug/1779476). Current [support](https://askubuntu.com/questions/1032938/trying-to-install-nvidia-driver-for-ubuntu-desktop-18-04-lts) just for just nvidia [drivers](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053) is [FUBAR](https://bugs.launchpad.net/ubuntu/+source/nvidia-graphics-drivers-390/+bug/1752053). Personally, I will not move on to 18.04 until I see an official CUDA package from Nvidia.
-- However, **if you are not installing CUDA libraries** and you're not afraid to pass through dependency hell, 18.04 will likely suit your needs. But, keep in mind:
-    - Bazel does not support 18.04 (Bazel is required for building TensorFlow)
-    - CUDA and it's libraries does not support 18.04 (CUDA is optional)
-    - Intel MKL does not support 18.04 (MKL is optional)
+### `18.04`
+With native support for CUDA 10.0, 18.04 is finally a viable option for your GPU machine. **This is now the primary ubuntu version I use when building.** While I still think 16.04 is far better than 18.04, if you are running a GPU setup, I would recommend `18.04`, as you will have less concerns about compatibility with the newer CUDA versions and you already have the latest GCC-7.
 
 
 ### Properly configured python environment
 *Detailed steps [below](#setting-up-your-python-environment).*
 
-You need to have your python environment setup before you build TF. This guide is predicated on a virtualenv setup through [pyenv](https://github.com/pyenv/pyenv) and building for **Python 3**, specifically 3.6, which is the latest Python version supported by TensorFlow (3.7 not yet supported at time of writing). If you already have your python setup, and understand library pathing, then you should be fine.
+You need to have your python environment setup before you build TF. This guide is predicated on a virtualenv setup through [pyenv](https://github.com/pyenv/pyenv) and building for **Python 3**, specifically 3.6, which is the latest Python version supported by TensorFlow. 3.7, as of v1.11.0 is still not yet supported. If you already have your python setup, and understand library pathing, then you should be fine.
 
 Using system site-packages and libraries (stuff rooted in /usr) for python is STRONGLY DISCOURAGED.
 
@@ -204,8 +202,8 @@ Remember to use your own file names! The ones listed below were simply the curre
 # Make sure you download the network package, NOT the local!
 #  The local package does not always support the latest kernel!
 
-sudo dpkg -i cuda-repo-ubuntu1604_9.2.148-1_amd64.deb
-sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
+sudo dpkg -i cuda-repo-ubuntu1804_10.0.130-1_amd64.deb
+sudo apt-key adv --fetch-keys http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
 sudo apt update
 
 # WARNING: if you install the normal `cuda` package instead of the
@@ -213,11 +211,11 @@ sudo apt update
 #  update your CUDA installation. Very rarely do CUDA-accelerated
 #  libraries support new CUDA versions at release, so you want to lock
 #  in your cuda version
-sudo apt install cuda-9-2
+sudo apt install cuda-10-0
 
 # Now, add the following lines to your shell config (.zshrc, etc)
-export PATH=/usr/local/cuda-9.2/bin${PATH:+:${PATH}}
-export LD_LIBRARY_PATH=/usr/local/cuda-9.2/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+export PATH=/usr/local/cuda-10.0/bin${PATH:+:${PATH}}
+export LD_LIBRARY_PATH=/usr/local/cuda-10.0/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
 # Reboot machine to finish installation
 reboot
@@ -232,30 +230,29 @@ nvcc -V
 
 nvcc: NVIDIA (R) Cuda compiler driver
 Copyright (c) 2005-2018 NVIDIA Corporation
-Built on Tue_Jun_12_23:07:04_CDT_2018
-Cuda compilation tools, release 9.2, V9.2.148
+Built on Sat_Aug_25_21:08:01_CDT_2018
+Cuda compilation tools, release 10.0, V10.0.130
 
 #===== Verify GPU processes
 nvidia-smi
 
-Wed Sep  5 13:29:47 2018
 +-----------------------------------------------------------------------------+
-| NVIDIA-SMI 396.44                 Driver Version: 396.44                    |
+| NVIDIA-SMI 410.48                 Driver Version: 410.48                    |
 |-------------------------------+----------------------+----------------------+
 | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
 | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
 |===============================+======================+======================|
 |   0  GeForce GTX 1070    Off  | 00000000:01:00.0  On |                  N/A |
-|  0%   33C    P8     7W / 151W |    487MiB /  8116MiB |      0%      Default |
+|  0%   35C    P8     9W / 151W |    401MiB /  8110MiB |      0%      Default |
 +-------------------------------+----------------------+----------------------+
 
 +-----------------------------------------------------------------------------+
 | Processes:                                                       GPU Memory |
 |  GPU       PID   Type   Process name                             Usage      |
 |=============================================================================|
-|    0      1066      G   /usr/lib/xorg/Xorg                           307MiB |
-|    0      2250      G   ...-token=8A67B2F1EABFF160B8155A812A7C727D    49MiB |
-|    0      2598      G   ...-token=407E46496140809C1A6609D27566E245    70MiB |
+|    0       845      G   /usr/lib/xorg/Xorg                           272MiB |
+|    0     12078      G   ...quest-channel-token=4837529118834796483    95MiB |
+|    0     12380      G   ...-token=CBD3F8B873FDB05F4F1FFFDADE4C57BA    31MiB |
 +-----------------------------------------------------------------------------+
 ```
 Great! CUDA's all set!
@@ -269,18 +266,18 @@ You also have to sign up and do a silly survey to get access to the cuDNN (and T
 ```bash
 #==== cuDNN
 # tar file method:
-tar -xzvf cudnn-9.2-linux-x64-v7.2.1.38.tgz # whatever ver you got
+tar -xzvf cudnn-10.0-linux-x64-v7.3.1.20.tgz # whatever ver you got
 sudo cp cuda/include/cudnn.h /usr/local/cuda/include
 sudo cp cuda/lib64/libcudnn* /usr/local/cuda/lib64
 sudo chmod a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn*
 
 # Now verify cuDNN installation was successful
-#  For cuDNN 7.2, you should see CUDNN_MAJOR 7, CUDNN_MINOR 2
-cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 2
+#  For cuDNN 7.3, you should see CUDNN_MAJOR 7, CUDNN_MINOR 3
+cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 3
 
 ## Should see something like:
 #define CUDNN_MAJOR 7
-#define CUDNN_MINOR 2
+#define CUDNN_MINOR 3
 #define CUDNN_PATCHLEVEL 1
 --
 #define CUDNN_VERSION (CUDNN_MAJOR * 1000 + CUDNN_MINOR * 100 + CUDNN_PATCHLEVEL)
@@ -295,7 +292,7 @@ While CUDA and cuDNN are required for any GPU-accelerated ML framework, TensorRT
 #==== TensorRT
 # First install CUDA. Then get the latest TensorRT supporting your
 #  CUDA version. eg, at the time of writing:
-sudo dpkg -i nv-tensorrt-repo-ubuntu1604-cuda9.2-ga-trt4.0.1.6-20180612_1-1_amd64.deb
+sudo dpkg -i nv-tensorrt-repo-ubuntu1804-cuda10.0-trt5.0.0.10-rc-20180906_1-1_amd64.deb
 sudo apt update
 sudo apt install tensorrt
 sudo apt install uff-converter-tf
@@ -303,12 +300,13 @@ sudo apt install uff-converter-tf
 # verify:
 dpkg -l | grep TensorRT
 ## Should see something like:
-ii  graphsurgeon-tf                                            4.1.2-1+cuda9.2                              amd64        GraphSurgeon for TensorRT package
-ii  libnvinfer-dev                                             4.1.2-1+cuda9.2                              amd64        TensorRT development libraries and headers
-ii  libnvinfer-samples                                         4.1.2-1+cuda9.2                              amd64        TensorRT samples and documentation
-ii  libnvinfer4                                                4.1.2-1+cuda9.2                              amd64        TensorRT runtime libraries
-ii  tensorrt                                                   4.0.1.6-1+cuda9.2                            amd64        Meta package of TensorRT
-ii  uff-converter-tf                                           4.1.2-1+cuda9.2                              amd64        UFF converter for TensorRT package
+ii  graphsurgeon-tf                                              5.0.0-1+cuda10.0                     amd64        GraphSurgeon for TensorRT package
+ii  libnvinfer-dev                                               5.0.0-1+cuda10.0                     amd64        TensorRT development libraries and headers
+ii  libnvinfer-samples                                           5.0.0-1+cuda10.0                     amd64        TensorRT samples and documentation
+ii  libnvinfer5                                                  5.0.0-1+cuda10.0                     amd64        TensorRT runtime libraries
+ii  tensorrt                                                     5.0.0.10-1+cuda10.0                  amd64        Meta package of TensorRT
+ii  uff-converter-tf                                             5.0.0-1+cuda10.0                     amd64        UFF converter for TensorRT package
+
 
 ```
 TensorRT is good!

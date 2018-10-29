@@ -15,6 +15,7 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 ## GPU builds
 | Version |  Py | CUDA | cuDNN |      TensorRT      |         MKL        | Link                                                                                                                                        |
 |:-------:|:---:|:----:|:-----:|:------------------:|:------------------:|---------------------------------------------------------------------------------------------------------------------------------------------|
+|  1.11.0 | 3.6 |  10.0 |  7.3  | :heavy_check_mark: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.11.0-gpu-10.0_7.3_5.0-mkl/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl |
 |  1.10.0 | 3.6 |  9.2 |  7.2  | :heavy_check_mark: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.2-tensorrt-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl |
 |  1.10.0 | 3.6 |  9.1 |  7.1  |         :x:        | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.1-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl          |
 
@@ -76,24 +77,15 @@ git clone --depth=1 https://github.com/tensorflow/tensorflow.git && cd tensorflo
 ```
 Now, build tensorflow based on your needs
 
-<<<<<<< HEAD
+
 ## Simple build: no need for ./configure
-**NOTE, Update:** *Guide is outdated for older machines*.
-Previously (tf < v1.11.0), entering configure was mostly unnecessary for the majority of use cases. Lately, I've been having build issues with skipping `configure` when trying to build for older machines (from newer architecture).
-It looks like this is because the TF build process is looking for the *actual* `system-site-packages` for python, and will not path to a `virtualenv`. Even when you do go through `configure` and specify `-march=ivybridge`, it will build successfully, but will not actually be built for Ivy Bridge.
-
-I will update the guide when I've figured out the issues with building for different architectures (`march`). *The guide should still be valid for modern machines*.
-
-=======
-## Simple build: no need for ./configure, (the majority of cases)
->>>>>>> 7be410acf6be11c410e902224f056968906221c8
-
 Go this route if the following sounds true:
 - I don't need XLA JIT, GDR, VERBS, OpenCL SYSCL, or MPI support
 - I don't need GPU (CUDA) support
   - Or, I need GPU support, and I have CUDA 9.0 and don't need TensorRT
 
 ## Build examples:
+:warning: **NB**: When building for other machines, keep in mind that your distro versions generally need to match. ie, building for 14.04 from 16.04 will likely not work.
 
 ### *"I don't need GPU support, nor XLA JIT, GDR, VERBS, OpenCL SYSCL, MPI support"*
 
