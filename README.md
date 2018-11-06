@@ -13,11 +13,12 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 * * *
 
 ## GPU builds
-| Version | buntu |  Py | CUDA | cuDNN |      TensorRT      |         MKL        | Link                                                                                                                                        |
-|---------|:-----:|:---:|:----:|:-----:|:------------------:|:------------------:|---------------------------------------------------------------------------------------------------------------------------------------------|
-| 1.11.0  | 18.04 | 3.6 | 10.0 |  7.3  | :heavy_check_mark: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.11.0-gpu-10.0_7.3_5.0-mkl/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl |
-| 1.10.0  | 16.04 | 3.6 |  9.2 |  7.2  | :heavy_check_mark: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.2-tensorrt-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl |
-| 1.10.0  | 16.04 | 3.6 |  9.1 |  7.1  |         :x:        | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.1-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl          |
+| Version | buntu |  Py | CUDA | cuDNN |      TensorRT      | Extras                                                                              | Link                                                                                                                                        |
+|---------|:-----:|:---:|:----:|:-----:|:------------------:|-------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| 1.12.0  | 18.04 | 3.6 | 10.0 | 7.3   | :heavy_check_mark: | :heavy_check_mark: XLA JIT<br/>:heavy_check_mark: nGraph<br/>:heavy_check_mark: MKL | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.12.0-gpu-10.0/tensorflow-1.12.0-cp36-cp36m-linux_x86_64.whl             |
+| 1.11.0  | 18.04 | 3.6 | 10.0 |  7.3  | :heavy_check_mark: | :heavy_check_mark: MKL                                                              | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.11.0-gpu-10.0_7.3_5.0-mkl/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl |
+| 1.10.0  | 16.04 | 3.6 |  9.2 |  7.2  | :heavy_check_mark: | :heavy_check_mark: XLA JIT<br/>:heavy_check_mark: MKL                               | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.2-tensorrt-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl |
+| 1.10.0  | 16.04 | 3.6 |  9.1 |  7.1  |         :x:        | :heavy_check_mark: MKL                                                              | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.1-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl          |
 
 
 
@@ -70,18 +71,18 @@ The following guide is the quick and dirty rundown on building tf, and setting u
 # Tensorflow configuration and build
 You've finished setup; now it's time for building TF.
 
-### First, clone the tensorflow source. 
-The tensorflow repo is large and can take awhile to download the full git tree, so I recommend either cloning at `--depth=1` (if target-version == master version) or checking out the target version tag.
+### First, clone the tensorflow source.
+The tensorflow repo is large and can take awhile to download the full git tree, so I recommend either cloning at `--depth=1` and checking out the target version tag.
 ```bash
 # Clone tensorflow source
 # -----------------------
-# master version == your target version
+# Clone target version, eg v1.12
+git clone https://github.com/tensorflow/tensorflow.git --branch v1.12.0 --depth=1
+
+# master version == your target version # rarely the case
 git clone --depth=1 https://github.com/tensorflow/tensorflow.git
 
-# Checking out target version tag (eg, 1.11.0)
-git clone https://github.com/tensorflow/tensorflow.git --branch v1.11.0 --depth=1
-
-# I don't give a shit about the size
+# I don't mind the size, and/or I plan to develop
 git clone https://github.com/tensorflow/tensorflow.git
 ```
 Now, build tensorflow based on your needs
@@ -100,7 +101,7 @@ This means that unless you need support for the following:
 **You don't need to go through configure**
 
 ## Build examples:
-:warning: **NB**: When building for other machines, keep in mind that _**your distro versions generally need to match**_. ie, building for 14.04 from 16.04 will likely not work. 
+:warning: **NB**: When building for other machines, keep in mind that _**your distro versions generally need to match**_. ie, building for 14.04 from 16.04 will likely not work.
 This is because your `GLIBC` versions will not be matched. I've been trying for awhile to configure bazel for compiling against a linked GLIBC (vs system lib) or to compile for a target GLIBC version, but have not been successful yet.
 
 ### *"I don't need any extra stuff or GPU support, just a TF optimized to my machine"*
@@ -149,6 +150,7 @@ ROCm support will be enabled for TensorFlow.
 ```
 
 ## CUDA options:
+Use default paths. Whatever version of CUDA you have installed, it always links to the default `/usr/local/cuda` path. If you did not use default pathing during your CUDA setup, you probably already know what you are doing.
 ```
 # I'm on CUDA 10.0
 Please specify the CUDA SDK version you want to use. [Leave empty to default to CUDA 9.0]: 10.0
@@ -164,18 +166,23 @@ Do you wish to build TensorFlow with TensorRT support? [y/N]: y
 
 Please specify the location where TensorRT is installed. [Default is /usr/lib/x86_64-linux-gnu]:
 
-Please specify the locally installed NCCL version you want to use. [Default is to use https://github.com/nvidia/nccl]:
+Please specify the NCCL version you want to use. If NCCL 2.2 is not installed, then you can use version 1.3 that can be fetched automatically but it may have worse performance with multiple GPUs. [Default is 2.2]: 2.3
+
+NCCL libraries found in /usr/lib/x86_64-linux-gnu/libnccl.so
+This looks like a system path.
+Assuming NCCL header path is /usr/include
 
 # CUDA compute capability: just do whatever your card is rated for, mine's 6.1
+Please specify a list of comma-separated Cuda compute capabilities you want to build with.
 You can find the compute capability of your device at: https://developer.nvidia.com/cuda-gpus.
-Please note that each additional compute capability significantly increases your build time and binary size. [Default is: 6.1]: 
+Please note that each additional compute capability significantly increases your build time and binary size. [Default is: 6.1]:
 
 ```
 
 
 ## Hey... What about that one line though? The optimization flags?
 ```bash
-Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native -Wno-sign-compare]:
+Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]:
 ```
 
 
@@ -189,6 +196,10 @@ Anything you would pass here is either automatically handled by your answers in 
 `bazel build --config=opt //tensorflow/tools/pip_package:build_pip_package`
 
 If you built for CUDA or whatever, it's already been setup. There's no need to specify it as a config option again, nor is there any need to list out all the ISA extensions (SSE4.2, AVX, etc.). That's all handled by -march=native (that line you were SUPPOSED to default). If you want mkl, you can `bazel build --config=opt --config=mkl`
+
+If you want to build for a different target `march`, and you smashed that `"--config=opt"` line, this is where you specify the desired `march`, eg:
+
+`bazel build --copt=-march="sandybridge" //tensorflow/tools/pip_package:build_pip_package`
 
 ## Finally: build the pip wheel
 I like just putting the pip whl in home, but put it wherever you want.
