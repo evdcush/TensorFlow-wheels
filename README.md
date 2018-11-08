@@ -13,7 +13,7 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 * * *
 
 ## GPU builds
-| Version | buntu |  Py | CUDA | cuDNN |      TensorRT      | Extras                                                                              | Link                                                                                                                                        |
+| Version | buntu |  Py | CUDA | cuDNN |      TensorRT      | AdditionalOpts                                                                              | Link                                                                                                                                        |
 |---------|:-----:|:---:|:----:|:-----:|:------------------:|-------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
 | 1.12.0  | 18.04 | 3.6 | 10.0 | 7.3   | :heavy_check_mark: | :heavy_check_mark: XLA JIT<br/>:heavy_check_mark: nGraph<br/>:heavy_check_mark: MKL | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.12.0-gpu-10.0/tensorflow-1.12.0-cp36-cp36m-linux_x86_64.whl             |
 | 1.11.0  | 18.04 | 3.6 | 10.0 |  7.3  | :heavy_check_mark: | :heavy_check_mark: MKL                                                              | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.11.0-gpu-10.0_7.3_5.0-mkl/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl |
