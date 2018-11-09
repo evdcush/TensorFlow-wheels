@@ -15,10 +15,10 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 ## GPU builds
 | Version | buntu |  Py | CUDA | cuDNN |      TensorRT      | AdditionalOpts                                                                              | Link                                                                                                                                        |
 |---------|:-----:|:---:|:----:|:-----:|:------------------:|-------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
-| 1.12.0  | 18.04 | 3.6 | 10.0 | 7.3   | :heavy_check_mark: | :heavy_check_mark: XLA JIT<br/>:heavy_check_mark: MKL | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.12.0-gpu-10.0/tensorflow-1.12.0-cp36-cp36m-linux_x86_64.whl             |
-| 1.11.0  | 18.04 | 3.6 | 10.0 |  7.3  | :heavy_check_mark: | :heavy_check_mark: MKL                                                              | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.11.0-gpu-10.0_7.3_5.0-mkl/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl |
-| 1.10.0  | 16.04 | 3.6 |  9.2 |  7.2  | :heavy_check_mark: | :heavy_check_mark: XLA JIT<br/>:heavy_check_mark: MKL                               | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.2-tensorrt-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl |
-| 1.10.0  | 16.04 | 3.6 |  9.1 |  7.1  |         :x:        | :heavy_check_mark: MKL                                                              | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.1-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl          |
+| 1.12.0  | 18.04 | 3.6 | 10.0 | 7.3   | :heavy_check_mark: | - XLA JIT<br/>- MKL | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.12.0-gpu-10.0/tensorflow-1.12.0-cp36-cp36m-linux_x86_64.whl             |
+| 1.11.0  | 18.04 | 3.6 | 10.0 |  7.3  | :heavy_check_mark: | - MKL                                                              | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.11.0-gpu-10.0_7.3_5.0-mkl/tensorflow-1.11.0-cp36-cp36m-linux_x86_64.whl |
+| 1.10.0  | 16.04 | 3.6 |  9.2 |  7.2  | :heavy_check_mark: | - XLA JIT<br/>- MKL                               | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.2-tensorrt-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl |
+| 1.10.0  | 16.04 | 3.6 |  9.1 |  7.1  |         :x:        | - MKL                                                              | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-gpu-9.1-mkl/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl          |
 
 
 
@@ -110,9 +110,9 @@ This is because your `GLIBC` versions will not be matched. I've been trying for 
 
 * * *
 
-### *"But I wanted nGraph and MKL support!"*
+### *"But I wanted MKL support!"*
 
-:point_right: `bazel build --config=opt --config=ngraph --config=mkl //tensorflow/tools/pip_package:build_pip_package`
+:point_right: `bazel build --config=opt --config=mkl //tensorflow/tools/pip_package:build_pip_package`
 
 * * *
 
@@ -134,7 +134,7 @@ This is because your `GLIBC` versions will not be matched. I've been trying for 
 ## Specialized build: ./configure
 Configure your Bazel build through `configure` if the following is true:
 - I need OpenCL SYSCL, ROCm, or MPI support
-- My GPU library versions are different from TF defaults: TF 1.12.0 ---> `CUDA 9.0, cuDNN 7.2, TensorRT 4, nccl 2.2`
+- My GPU library versions are different from TF defaults: TF 1.12.0 (`CUDA 9.0, cuDNN 7.2, TensorRT 4, nccl 2.2`)
   - This is the main reason why I build custom
 
 `./configure` is actually pretty straightforward. Just answer y/n for the stuff you want, and provide any additional info it may ask for your use-case.
@@ -144,7 +144,7 @@ Do you wish to build TensorFlow with OpenCL SYCL support? [y/N]: y
 OpenCL SYCL support will be enabled for TensorFlow.
 
 # I want ROCm
-Do you wish to build TensorFlow with nGraph support? [y/N]: y
+Do you wish to build TensorFlow with ROCm support? [y/N]: y
 ROCm support will be enabled for TensorFlow.
 
 ```
@@ -197,6 +197,7 @@ Anything you would pass here is either automatically handled by your answers in 
 
 If you built for CUDA or whatever, it's already been setup. There's no need to specify it as a config option again, nor is there any need to list out all the ISA extensions (SSE4.2, AVX, etc.). That's all handled by -march=native (that line you were SUPPOSED to default). If you want mkl, you can `bazel build --config=opt --config=mkl`
 
+### Non-native `march`
 If you want to build for a different target `march`, and you smashed that `"--config=opt"` line, this is where you specify the desired `march`, eg:
 
 `bazel build --copt=-march="sandybridge" //tensorflow/tools/pip_package:build_pip_package`
