@@ -24,12 +24,15 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 
 
 ## CPU builds
-| Version | buntu |  Py |       SSE4.1       |       SSE4.2       |         AVX        | AVX2 | FMA |         MKL        | Links                                                                                                                                    |
-|:-------:|:-----:|:---:|:------------------:|:------------------:|:------------------:|:----:|:---:|:------------------:|------------------------------------------------------------------------------------------------------------------------------------------|
-|  1.10.0 | 16.04 | 3.6 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :x: | :x: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-cpu-mkl-ivybridge/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl |
-|   1.8   | 16.04 | 3.6 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :x: | :x: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.8-cpu-ivybridge-MKL/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl     |
-|   1.8   | 16.04 | 3.6 | :heavy_check_mark: | :heavy_check_mark: |         :x:        |  :x: | :x: |         :x:        | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.8-cpu-westmere/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl          |
+| Version | buntu |  Py |       SSE4.1       |       SSE4.2       |         AVX        | AVX2 | FMA |         MKL        | Links                                                                                                                                     |
+|:-------:|:-----:|:---:|:------------------:|:------------------:|:------------------:|:----:|:---:|:------------------:|-------------------------------------------------------------------------------------------------------------------------------------------|
+|  1.12.0 | 16.04 | 3.7 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :x: | :x: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.12.0-py37-cpu-ivybridge/tensorflow-1.12.0-cp37-cp37m-linux_x86_64.whl |
+|  1.10.0 | 16.04 | 3.6 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :x: | :x: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-cpu-mkl-ivybridge/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl  |
+|   1.8   | 16.04 | 3.6 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :x: | :x: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.8-cpu-ivybridge-MKL/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl      |
+|   1.8   | 16.04 | 3.6 | :heavy_check_mark: | :heavy_check_mark: |         :x:        |  :x: | :x: |         :x:        | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.8-cpu-westmere/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl           |
 
+
+[**Note on building tensorflow 1.12 for python 3.7**](#building-for-python-3.7)
 
 
 # Installing TensorFlow wheels:
@@ -207,6 +210,38 @@ If you want to build for a different target `march`, and you smashed that `"--co
 I like just putting the pip whl in home, but put it wherever you want.
 
 `bazel-bin/tensorflow/tools/pip_package/build_pip_package ~/`
+
+* * *
+
+# "Building" for Python 3.7
+TensorFlow, as of v1.12.0, still does not support python 3.7. Apparently the problem is that TF has not yet updated their python C API wrappers for the changes made in 3.7.
+
+
+
+To quote the [protobuf commit message that explains how to update for 3.7](https://github.com/protocolbuffers/protobuf/commit/0a59054c30e4f0ba10f10acfc1d7f3814c63e1a7):
+
+> `Compilation of Python wrappers fails with Python 3.7 because
+the Python folks changed their C API such that
+PyUnicode_AsUTF8AndSize() now returns a const char* rather
+than a char*. Add a patch to work around. Relates #4086.`
+
+That commit explains exactly what files and lines to update to support the changes in the C API. It is a minor edit (just 6 lines).
+
+Here's my hacky way of building for 3.7:
+
+- Do your `bazel build ....` as normal, **within a 3.7 venv**
+- The process will fail about 5-10 min into build
+- The error stack trace will give the file and line that caused the error (bazel tmp files).
+  - these files are located in the `pyext` directory, within bazel's temporary build workspace; the path will look something like the following:
+    `/tmp/bazel/2fa4e13d97eaba0cbe8ded40faed00e3/external/protobuf_archive/python/google/protobuf/pyext`
+    - NB: *your root may be ~/.cache/, depending on how you installed bazel and your bazel config*
+- Navigate to the pyext folder
+- replace the lines highlighted in the commit diff linked above ([here it is again](https://github.com/protocolbuffers/protobuf/commit/0a59054c30e4f0ba10f10acfc1d7f3814c63e1a7))
+- now when you `bazel build ...` again, you should have no further issues related to python 3.7
+  - **warning**: DO `bazel clean`, DO NOT `bazel clean --expunge`, or else bazel will purge the temp files you just edited, and you have to do it again
+
+
+**For convenience**: I have included a [pyext](pyext) dir in this repo that has all the corrected files, so you can also just copy those files to bazel's pyext. *these files will be removed when TF actually supports python 3.7*
 
 * * *
 
