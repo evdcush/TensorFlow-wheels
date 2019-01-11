@@ -26,13 +26,14 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 ## CPU builds
 | Version | buntu |  Py |       SSE4.1       |       SSE4.2       |         AVX        | AVX2 | FMA |         MKL        | Links                                                                                                                                     |
 |:-------:|:-----:|:---:|:------------------:|:------------------:|:------------------:|:----:|:---:|:------------------:|-------------------------------------------------------------------------------------------------------------------------------------------|
+| 1.12.0  | 18.04 | 3.7 | :heavy_check_mark: | :heavy_check_mark: |         :x:        |  :x: | :x: |         :x:        | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.12.0-py37-cpu-westmere/tensorflow-1.12.0-cp37-cp37m-linux_x86_64.whl  |
 |  1.12.0 | 16.04 | 3.7 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :x: | :x: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.12.0-py37-cpu-ivybridge/tensorflow-1.12.0-cp37-cp37m-linux_x86_64.whl |
 |  1.10.0 | 16.04 | 3.6 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :x: | :x: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.10.0-cpu-mkl-ivybridge/tensorflow-1.10.0-cp36-cp36m-linux_x86_64.whl  |
 |   1.8   | 16.04 | 3.6 | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |  :x: | :x: | :heavy_check_mark: | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.8-cpu-ivybridge-MKL/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl      |
 |   1.8   | 16.04 | 3.6 | :heavy_check_mark: | :heavy_check_mark: |         :x:        |  :x: | :x: |         :x:        | https://github.com/evdcush/TensorFlow-wheels/releases/download/tf-1.8-cpu-westmere/tensorflow-1.8.0-cp36-cp36m-linux_x86_64.whl           |
 
 
-[**Note on building tensorflow 1.12 for python 3.7**](#building-for-python-3.7)
+### [Note on building tensorflow 1.12 for python 3.7](#building-for-python-3.7)
 
 
 # Installing TensorFlow wheels:
