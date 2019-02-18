@@ -56,7 +56,7 @@ You can find the wheels in the [releases page](https://github.com/evdcush/Tensor
 Quite a few people have asked me how I build TF, and I myself found the resources online to be either incomplete or even incorrect when I was first learning. So I took some notes on my own process. I've managed to reach some degree of consistency when building in the manner described, but YMMV.
 
 
-The following guide is the quick and dirty rundown on building tf, and setting up your environment. For more detailed steps, checkout the [extended setup guide](env-setup-guide.md) (Update for 1.12 WIP).
+The following guide is the quick and dirty rundown on building tf, and setting up your environment. For more detailed steps, checkout the [extended setup guide](env-setup-guide.md).
 
 
 ## Preparing your environment
@@ -156,6 +156,8 @@ ROCm support will be enabled for TensorFlow.
 
 ## CUDA options:
 Use default paths. Whatever version of CUDA you have installed, it always links to the default `/usr/local/cuda` path. If you did not use default pathing during your CUDA setup, you probably already know what you are doing.
+
+All lines with `#` are my own comments
 ```
 # I'm on CUDA 10.0
 Please specify the CUDA SDK version you want to use. [Leave empty to default to CUDA 9.0]: 10.0

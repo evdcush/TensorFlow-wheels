@@ -19,7 +19,7 @@ With native support for CUDA 10.0, 18.04 is finally a viable option for your GPU
 ### Properly configured python environment
 *Detailed steps [below](#setting-up-your-python-environment).*
 
-You need to have your python environment setup before you build TF. This guide is predicated on a virtualenv setup through [pyenv](https://github.com/pyenv/pyenv) and building for **Python 3**, specifically 3.6, which is the latest Python version supported by TensorFlow. 3.7, as of v1.11.0 is still not yet supported. If you already have your python setup, and understand library pathing, then you should be fine.
+You need to have your python environment setup before you build TF. This guide is predicated on a virtualenv setup through [pyenv](https://github.com/pyenv/pyenv) and building for **Python 3**. If you already have your python setup, and understand library pathing, then you should be fine.
 
 Using system site-packages and libraries (stuff rooted in /usr) for python is STRONGLY DISCOURAGED.
 
@@ -29,8 +29,15 @@ Using system site-packages and libraries (stuff rooted in /usr) for python is ST
 Bazel is required for building tensorflow. Installation is straightforward, and you have a few options. I prefer the APT repo method; it's brainlessly easy, automatically updates, doesn't have a fat binary in `$HOME`, and does not need any path updates in shell config.
 
 ### Latest TensorFlow source
-Clone the latest TensorFlow from the [official repo](https://github.com/tensorflow/tensorflow/)
-`git clone --depth=1 https://github.com/tensorflow/tensorflow.git`
+Clone the latest TensorFlow from the [official repo](https://github.com/tensorflow/tensorflow/) (either selecting the release branch you would like, or simply cloning the entire repo).
+
+```bash
+# Clone the entire repo (which includes release branches)
+git clone https://github.com/tensorflow/tensorflow.git
+
+# Clone the specific release you want (eg v1.12)
+git clone https://github.com/tensorflow/tensorflow.git --branch v1.12.0 --depth=1
+```
 
 
 ### Optional Setup
@@ -157,8 +164,8 @@ eval "$(pyenv virtualenv-init -)"
 
 # Then source your shell config (you may need to start a new terminal session)
 source ~/.zshrc # or .bashrc or whatever
-pyenv install 3.6.6 # tensorflow does not currently support 3.7
-pyenv virtualenv 3.6.6 my_virtualenv_name
+pyenv install 3.6.8 # (see the README for building for 3.7
+pyenv virtualenv 3.6.8 my_virtualenv_name
 pyenv local my_virtualenv_name
 pip install -U pip setuptools
 pip install wheel numpy scipy keras # MUST install wheel and keras for tf to build successfully
@@ -169,10 +176,10 @@ $ which python
 /home/$USER/.pyenv/shims/python
 
 $ python -V
-Python 3.6.6
+Python 3.6.8
 
 $ python
-Python 3.6.6 (default, Sep  1 2018, 22:11:55)
+Python 3.6.8 (default, Sep  1 2018, 22:11:55)
 [GCC 8.1.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
 >>> print('All set!')
