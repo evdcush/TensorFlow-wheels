@@ -6,14 +6,10 @@ There are very likely to be assumptions about your installation or setup that I 
 
 * * *
 
-## \*Buntu 16.04 OR 18.04
+## \*Buntu 18.04
+Install your preferred flavor of Ubuntu 18.04. Buntu has native support from all the libraries and software you need for your deep-learning env.
 
-### `16.04`
-Xenial Ubuntu has native support from all the libraries and software you need for your deep-learning env. From my own experience, it's also probably the most stable, solid distro I've ever used, even amongst other buntu LTS releases.
-- [**Xubuntu**](https://xubuntu.org/): my recommendation for Ubuntu. It's an official flavor of Ubuntu that has a very clean, lightweight desktop environment (XFCE), without most of the bloat from vanilla Ubuntu.
-
-### `18.04`
-With native support for CUDA 10.0, 18.04 is finally a viable option for your GPU machine. **This is now the primary ubuntu version I use when building.** While I still think 16.04 is far better than 18.04, if you are running a GPU setup, I would recommend `18.04`, as you will have less concerns about compatibility with the newer CUDA versions and you already have the latest GCC-7.
+I recommend [Xubuntu](https://xubuntu.org/download#lts). It's what all my machines use; clean, fast, lightweight enough for my westmere thinkpad, and without the Ubuntu bloat.
 
 
 ### Properly configured python environment
@@ -26,7 +22,7 @@ Using system site-packages and libraries (stuff rooted in /usr) for python is ST
 ### Bazel
 *Detailed steps [below](#installing-bazel)*
 
-Bazel is required for building tensorflow. Installation is straightforward, and you have a few options. I prefer the APT repo method; it's brainlessly easy, automatically updates, doesn't have a fat binary in `$HOME`, and does not need any path updates in shell config.
+Bazel is required for building tensorflow. Installation is straightforward, and you have a few options, but make sure you install Bazel `0.21` (`0.22` is not supported by tf).
 
 ### Latest TensorFlow source
 Clone the latest TensorFlow from the [official repo](https://github.com/tensorflow/tensorflow/) (either selecting the release branch you would like, or simply cloning the entire repo).
@@ -35,8 +31,8 @@ Clone the latest TensorFlow from the [official repo](https://github.com/tensorfl
 # Clone the entire repo (which includes release branches)
 git clone https://github.com/tensorflow/tensorflow.git
 
-# Clone the specific release you want (eg v1.12)
-git clone https://github.com/tensorflow/tensorflow.git --branch v1.12.0 --depth=1
+# Clone the specific release you want (eg v1.13.1)
+git clone https://github.com/tensorflow/tensorflow.git --branch v1.13.1 --depth=1
 ```
 
 
@@ -73,10 +69,12 @@ The most common method you will see when googling around is explicitly passing t
 - Or, specifying the config optimization flags in `./configure`:
 > `Please specify optimization flags to use during compilation when bazel option "--config=opt" is specified [Default is -march=native]: -msse4.1 -msse4.2 -mavx -mavx2 -mfma`
 
-### The ""just letting the build default do it for you automatically" way
-There's no reason you need to specify any of those optimization flags to the build configuration (**even if you aren't building for your machine/`march`!**)
+### The "just letting the build default do it for you automatically" way
+There's no reason you need to specify any of those optimization flags to the build configuration (**even if you aren't building for your machine/`march`**, more on that below).
 
 #### Understanding `-march=native`
+Check your own `march`: `gcc -march=native -Q --help=target | grep march`
+
 *`-march=native`* is the compiler option referring to your native x86_64 microarchitecture--in other words, the instruction set supported by your CPU.\
 You do not need to specify or configure your `march` to be native. It already is.
 
@@ -115,7 +113,7 @@ I say it's not really necessary to update GCC for building tensorflow because, u
 
 Also note that **there is no `kabylake` march**. If you are running a Kaby Lake processor, you use `skylake`. There is no Kaby Lake specific optimization (nor Coffee Lake for that matter). The only reason Cannon Lake is a separate march from skylake is because it supports AVX-512 by default (whereas the others had to be special chips, like Xeon, for that set).
 
-If you want to know what your `march=native` is considered by GCC, type `gcc -march=native -Q --help=target` in your console.
+If you want to know what your `march=native` is considered by GCC and what that supports, type `gcc -march=native -Q --help=target` in your console.
 
 If you are interested in what instruction sets are supported by what architectures in GCC, check out the GCC docs:
 - [gcc-4.9.4 march options docs](https://gcc.gnu.org/onlinedocs/gcc-4.9.4/gcc/i386-and-x86-64-Options.html#i386-and-x86-64-Options) The `gcc` version you most likely have. Note that `broadwell` is the latest intel arch.
@@ -127,7 +125,7 @@ If you are interested in what instruction sets are supported by what architectur
 ## Follow these instructions to install both GCC versions, and to be able to switch between them.
 
 ```bash
-#==== Install PPA
+# If you are *not* on 18.04, you must add this PPA to get gcc7/8
 sudo add-apt-repository ppa:ubuntu-toolchain-r/test
 sudo apt update
 sudo apt full-upgrade
@@ -164,8 +162,8 @@ eval "$(pyenv virtualenv-init -)"
 
 # Then source your shell config (you may need to start a new terminal session)
 source ~/.zshrc # or .bashrc or whatever
-pyenv install 3.6.8 # (see the README for building for 3.7
-pyenv virtualenv 3.6.8 my_virtualenv_name
+pyenv install 3.7.2
+pyenv virtualenv 3.7.2 my_virtualenv_name
 pyenv local my_virtualenv_name
 pip install -U pip setuptools
 pip install wheel numpy scipy keras # MUST install wheel and keras for tf to build successfully
@@ -176,11 +174,11 @@ $ which python
 /home/$USER/.pyenv/shims/python
 
 $ python -V
-Python 3.6.8
+Python 3.7.2
 
 $ python
-Python 3.6.8 (default, Sep  1 2018, 22:11:55)
-[GCC 8.1.0] on linux
+Python 3.7.2 (default, Jan 30 2019, 21:09:18)
+[GCC 8.2.0] on linux
 Type "help", "copyright", "credits" or "license" for more information.
 >>> print('All set!')
 All set!
@@ -189,7 +187,43 @@ All set!
 * * *
 
 # Installing Bazel
-WIP (it's ez tho :ok_hand:)
+Consult the [Bazel install guide for Ubuntu](https://docs.bazel.build/versions/master/install-ubuntu.html) and select which installation method you prefer. However, **make sure you install Bazel v0.21** and NOT the latest version, as of TF 1.13.1, `v0.23` or `0.22` as those versions are not yet supported by TF.
+
+I used the binary installer option, which I think is easiest. I install Bazel to `/opt/bazel`.
+
+```bash
+# Install prerequisites (super common packages omitted)
+sudo apt install pkg-config zlib1g-dev
+
+# Download the v0.21 binary installer from GitHub
+wget https://github.com/bazelbuild/bazel/releases/download/0.21.0/bazel-0.21.0-installer-linux-x86_64.sh
+
+# Make installer executable
+chmod +x bazel-0.21.0-installer-linux-x86_64.sh
+
+# Install bazel to /opt
+sudo ./bazel-0.22.0-installer-linux-x86_64.sh --prefix=/opt/bazel
+
+# Symlink binary
+sudo ln -sf /opt/bazel/bin/bazel /usr/local/bin
+
+```
+I would recommend against Bazel's installation guide installing to `--user`. The `--user` flag installs Bazel to `$HOME/bin`, which I think is a deadly sin. I don't like packages installing to a top-level home dir.
+
+If you do want to install Bazel for `user`, then I would recommend the following:
+
+```bash
+# Bazel's recommended cmd (DONT DO THIS!)
+./bazel-<version>-installer-linux-x86_64.sh --user
+
+# Install bazel bin to proper $USER bin, and lib to .bazel
+./bazel-<version>-installer-linux-x86_64.sh --bin=$HOME/.local/bin --prefix=$HOME/.bazel
+
+# $HOME/.local/bin should already be on $PATH by default, but if not
+# add the following to your shell config file (.bashrc or .zshrc):
+echo 'export PATH="${PATH:+${PATH}:}$HOME/.local/bin"' >> ~/.zshrc
+
+```
 
 * * *
 
@@ -233,34 +267,31 @@ You want to enter `nvcc -V` (nvidia driver) and `nvidida-smi` into your command 
 
 ```bash
 #==== Verify nvidia driver
-nvcc -V
-
+$ nvcc -V
 nvcc: NVIDIA (R) Cuda compiler driver
 Copyright (c) 2005-2018 NVIDIA Corporation
 Built on Sat_Aug_25_21:08:01_CDT_2018
 Cuda compilation tools, release 10.0, V10.0.130
 
 #===== Verify GPU processes
-nvidia-smi
-
+$ nvidia-smi
 +-----------------------------------------------------------------------------+
-| NVIDIA-SMI 410.48                 Driver Version: 410.48                    |
+| NVIDIA-SMI 410.79       Driver Version: 410.79       CUDA Version: 10.0     |
 |-------------------------------+----------------------+----------------------+
 | GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
 | Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
 |===============================+======================+======================|
 |   0  GeForce GTX 1070    Off  | 00000000:01:00.0  On |                  N/A |
-|  0%   35C    P8     9W / 151W |    401MiB /  8110MiB |      0%      Default |
+|  0%   33C    P8     6W / 151W |    146MiB /  8110MiB |      0%      Default |
 +-------------------------------+----------------------+----------------------+
 
 +-----------------------------------------------------------------------------+
 | Processes:                                                       GPU Memory |
 |  GPU       PID   Type   Process name                             Usage      |
 |=============================================================================|
-|    0       845      G   /usr/lib/xorg/Xorg                           272MiB |
-|    0     12078      G   ...quest-channel-token=4837529118834796483    95MiB |
-|    0     12380      G   ...-token=CBD3F8B873FDB05F4F1FFFDADE4C57BA    31MiB |
+|    0       835      G   /usr/lib/xorg/Xorg                           140MiB |
 +-----------------------------------------------------------------------------+
+
 ```
 Great! CUDA's all set!
 
@@ -279,17 +310,16 @@ sudo cp cuda/lib64/libcudnn* /usr/local/cuda/lib64
 sudo chmod a+r /usr/local/cuda/include/cudnn.h /usr/local/cuda/lib64/libcudnn*
 
 # Now verify cuDNN installation was successful
-#  For cuDNN 7.3, you should see CUDNN_MAJOR 7, CUDNN_MINOR 3
-cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 3
-
-## Should see something like:
+# For cuDNN 7.5, you should see CUDNN_MAJOR 7, CUDNN_MINOR 5
+cat /usr/local/cuda/include/cudnn.h | grep CUDNN_MAJOR -A 2
 #define CUDNN_MAJOR 7
-#define CUDNN_MINOR 3
-#define CUDNN_PATCHLEVEL 1
+#define CUDNN_MINOR 5
+#define CUDNN_PATCHLEVEL 0
 --
 #define CUDNN_VERSION (CUDNN_MAJOR * 1000 + CUDNN_MINOR * 100 + CUDNN_PATCHLEVEL)
 
 #include "driver_types.h"
+
 ```
 cuDNN, Done!
 
@@ -299,7 +329,7 @@ While CUDA and cuDNN are required for any GPU-accelerated ML framework, TensorRT
 #==== TensorRT
 # First install CUDA. Then get the latest TensorRT supporting your
 #  CUDA version. eg, at the time of writing:
-sudo dpkg -i nv-tensorrt-repo-ubuntu1804-cuda10.0-trt5.0.0.10-rc-20180906_1-1_amd64.deb
+sudo dpkg -i nv-tensorrt-repo-ubuntu1804-cuda10.0-trt5.0.2.6-ga-20181009_1-1_amd64.deb
 sudo apt update
 sudo apt install tensorrt
 sudo apt install uff-converter-tf
@@ -307,12 +337,12 @@ sudo apt install uff-converter-tf
 # verify:
 dpkg -l | grep TensorRT
 ## Should see something like:
-ii  graphsurgeon-tf                                              5.0.0-1+cuda10.0                     amd64        GraphSurgeon for TensorRT package
-ii  libnvinfer-dev                                               5.0.0-1+cuda10.0                     amd64        TensorRT development libraries and headers
-ii  libnvinfer-samples                                           5.0.0-1+cuda10.0                     amd64        TensorRT samples and documentation
-ii  libnvinfer5                                                  5.0.0-1+cuda10.0                     amd64        TensorRT runtime libraries
-ii  tensorrt                                                     5.0.0.10-1+cuda10.0                  amd64        Meta package of TensorRT
-ii  uff-converter-tf                                             5.0.0-1+cuda10.0                     amd64        UFF converter for TensorRT package
+ii  graphsurgeon-tf                                             5.0.2-1+cuda10.0                    amd64        GraphSurgeon for TensorRT package
+ii  libnvinfer-dev                                              5.0.2-1+cuda10.0                    amd64        TensorRT development libraries and headers
+ii  libnvinfer-samples                                          5.0.2-1+cuda10.0                    all          TensorRT samples and documentation
+ii  libnvinfer5                                                 5.0.2-1+cuda10.0                    amd64        TensorRT runtime libraries
+ii  tensorrt                                                    5.0.2.6-1+cuda10.0                  amd64        Meta package of TensorRT
+ii  uff-converter-tf                                            5.0.2-1+cuda10.0                    amd64        UFF converter for TensorRT package
 
 
 ```
